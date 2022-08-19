@@ -15,7 +15,7 @@ import static java.lang.String.format;
 public class MainVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
 
-    private Blockchain blockchain = new Blockchain();
+    private final Blockchain blockchain = new Blockchain();
 
     @Override
     public void start(Promise<Void> startPromise) {
