@@ -1,17 +1,29 @@
 package io.chain.models;
 
-import lombok.Builder;
-import lombok.ToString;
-import lombok.Value;
+import lombok.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
+import java.util.Objects;
 
-@Value
+@Getter
 @Builder
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Block {
+
+    private static final int DIFFICULTY = 5;
+    private static String DIFFICULTY_PREFIX;
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < DIFFICULTY; i++) {
+            sb.append("0");
+        }
+        DIFFICULTY_PREFIX = sb.toString();
+    }
 
     /*
      * Properties
@@ -21,9 +33,25 @@ public class Block {
     String hash;
     String previousBlockHash;
     byte[] data;
+    int nonce;
 
     /* TODO: Add transactions payload */
     /* TODO: Add metadata payload */
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Block block = (Block) o;
+        return timestamp == block.timestamp && nonce == block.nonce && Objects.equals(hash, block.hash) && Objects.equals(previousBlockHash, block.previousBlockHash) && Arrays.equals(data, block.data);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(timestamp, hash, previousBlockHash, nonce);
+        result = 31 * result + Arrays.hashCode(data);
+        return result;
+    }
 
     /*
      * Static Methods
@@ -34,9 +62,10 @@ public class Block {
         final byte[] data = "Will is building his own chain".getBytes(StandardCharsets.UTF_8);
         return builder()
                 .timestamp(start)
-                .hash(hash(start, "WillWasStillUnborn", data))
+                .hash(hash(start, "WillWasStillUnborn", data, 0))
                 .previousBlockHash("WillWasStillUnborn")
                 .data(data)
+                .nonce(0)
                 .build();
     }
 
@@ -46,26 +75,37 @@ public class Block {
      * @return a new block with <code>previousBlockHash</code> set to the provided <code>lastBlock</code>
      */
     public static Block mineBlock(Block lastBlock, byte[] data) {
-        final long minedAt = System.currentTimeMillis();
+        long minedAt;
+        int nonce = 0;
+        String hash;
+
+        do {
+            nonce++;
+            minedAt = System.currentTimeMillis();
+            hash = hash(minedAt, lastBlock.getHash(), data, nonce);
+        } while ( ! hash.startsWith(DIFFICULTY_PREFIX));
+
         Block newBlock = builder()
                 .timestamp(minedAt)
                 .previousBlockHash(lastBlock.getHash())
-                .hash(hash(minedAt, lastBlock.getHash(), data))
+                .hash(hash)
                 .data(data)
+                .nonce(nonce)
                 .build();
 
         return newBlock;
     }
 
-    public static String hash(long timestamp, String previousBlockHash, byte[] data) {
+    public static String hash(long timestamp, String previousBlockHash, byte[] data, int nonce) {
         final StringBuilder sb = new StringBuilder()
                 .append(timestamp)
                 .append(previousBlockHash)
-                .append(new String(data, StandardCharsets.UTF_8));
+                .append(new String(data, StandardCharsets.UTF_8))
+                .append(nonce);
         return DigestUtils.sha3_256Hex(sb.toString());
     }
 
     public static String hash(Block block) {
-        return hash(block.getTimestamp(), block.getPreviousBlockHash(), block.getData());
+        return hash(block.getTimestamp(), block.getPreviousBlockHash(), block.getData(), block.getNonce());
     }
 }

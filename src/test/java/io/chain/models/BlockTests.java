@@ -7,9 +7,10 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.GregorianCalendar;
 
-import static io.chain.models.Block.hash;
+import static io.chain.models.Block.*;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class BlockTests {
 
@@ -18,8 +19,8 @@ public final class BlockTests {
 
     @BeforeEach
     void beforeTest() {
-        genesisBlock = Block.genesisBlock();
-        block = Block.mineBlock(genesisBlock, "test data".getBytes(StandardCharsets.UTF_8));
+        genesisBlock = genesisBlock();
+        block = mineBlock(genesisBlock, "test data".getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -30,7 +31,7 @@ public final class BlockTests {
         assertEquals(bornAt, genesisBlock.getTimestamp());
         assertEquals("WillWasStillUnborn", genesisBlock.getPreviousBlockHash());
         assertEquals(data, new String(genesisBlock.getData(), StandardCharsets.UTF_8));
-        assertEquals(hash(bornAt, "WillWasStillUnborn", data.getBytes(StandardCharsets.UTF_8)), genesisBlock.getHash());
+        assertEquals(hash(bornAt, "WillWasStillUnborn", data.getBytes(StandardCharsets.UTF_8), 0), genesisBlock.getHash());
     }
 
     @Test
@@ -43,7 +44,7 @@ public final class BlockTests {
                                 .timestamp(now)
                                 .build();
         assertEquals(
-            format("Block(timestamp=%d, hash=%d, previousBlockHash=%d, data=null)", now, 1, 0),
+            format("Block(timestamp=%d, hash=%d, previousBlockHash=%d, data=null, nonce=0)", now, 1, 0),
             block.toString()
         );
     }
@@ -56,7 +57,7 @@ public final class BlockTests {
          * Cannot directly test <code>Block.mine</code> method due to hardcoded <i>block mining timestamp</i>.
          */
         final long now = System.currentTimeMillis();
-        final String hash = hash(now, genesisBlock.getHash(), "test data".getBytes(StandardCharsets.UTF_8));
+        final String hash = hash(now, genesisBlock.getHash(), "test data".getBytes(StandardCharsets.UTF_8), 0);
         final Block newBlock = Block.builder()
                                 .hash(hash)
                                 .previousBlockHash(genesisBlock.getHash())
@@ -70,5 +71,12 @@ public final class BlockTests {
     @DisplayName("test block hash")
     void testBlockHash() {
         assertEquals(genesisBlock.getHash(), Block.hash(genesisBlock));
+    }
+
+    @Test
+    @DisplayName("test correct hash with difficulty")
+    void testBlockHashDifficulty() {
+        Block block = mineBlock(genesisBlock(), "test".getBytes(StandardCharsets.UTF_8));
+        assertTrue(block.getHash().startsWith("00000"));
     }
 }
