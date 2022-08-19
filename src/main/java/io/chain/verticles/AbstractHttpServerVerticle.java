@@ -21,7 +21,7 @@ abstract class AbstractHttpServerVerticle extends AbstractConfiguredVerticle {
     private HttpServer server;
 
     @Override
-    public void start(Promise<Void> startPromise) throws Exception {
+    public void start(Promise<Void> startPromise) {
         retrieveConfig()
             .compose(this::createHttpServerOptions)
             .compose(this::createHttpServer)
