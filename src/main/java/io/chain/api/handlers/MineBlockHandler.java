@@ -10,6 +10,8 @@ import io.vertx.ext.web.RoutingContext;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import static io.chain.p2p.EventBusAddresses.NEW_BLOCKCHAIN;
+
 @Getter
 @AllArgsConstructor
 public class MineBlockHandler implements Handler<RoutingContext> {
@@ -22,7 +24,7 @@ public class MineBlockHandler implements Handler<RoutingContext> {
     public void handle(RoutingContext context) {
         final Block block = blockchain.addBlock(context.body().buffer().getBytes());
         LOGGER.info(String.format("Added block: %s", block.getHash()));
-        vertx.eventBus().publish("io.chain.block.new", blockchain.toJson());
+        vertx.eventBus().publish(NEW_BLOCKCHAIN.getAddress(), blockchain.toJson());
         context.next();
     }
 }

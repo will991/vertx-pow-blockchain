@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static io.chain.p2p.EventBusAddresses.NEW_BLOCKCHAIN;
 import static java.lang.String.format;
 
 @Getter
@@ -25,7 +26,7 @@ public final class BlockchainSyncVerticle extends AbstractVerticle {
 
     @Override
     public void start() {
-        register("block.new", msg -> {
+        register(NEW_BLOCKCHAIN.getAddress(), msg -> {
             new BlockchainSyncHandler(uuid, blockchain).handle(((JsonArray) msg.body()).toBuffer());
         });
     }
