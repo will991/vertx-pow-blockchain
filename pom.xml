@@ -74,6 +74,16 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.starkbank.ellipticcurve</groupId>
+            <artifactId>starkbank-ecdsa</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.syntifi.crypto</groupId>
+            <artifactId>crypto-key-ed25519</artifactId>
+            <version>0.3.1</version>
+        </dependency>
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.15</version>
