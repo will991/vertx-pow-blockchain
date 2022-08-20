@@ -77,6 +77,6 @@ public final class BlockTests {
     @DisplayName("test correct hash with difficulty")
     void testBlockHashDifficulty() {
         Block block = mineBlock(genesisBlock(), "test".getBytes(StandardCharsets.UTF_8));
-        assertTrue(block.getHash().startsWith("00000"));
+        assertTrue(block.getHash().startsWith("0000"));
     }
 }

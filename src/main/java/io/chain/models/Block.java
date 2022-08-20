@@ -15,7 +15,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Block {
 
-    private static final int DIFFICULTY = 5;
+    private static final int DIFFICULTY = 4;
     private static String DIFFICULTY_PREFIX;
     {
         StringBuilder sb = new StringBuilder();
