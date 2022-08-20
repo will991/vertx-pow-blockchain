@@ -5,7 +5,6 @@ import io.chain.api.handlers.GetBlocksHandler;
 import io.chain.api.handlers.MineBlockHandler;
 import io.chain.models.Blockchain;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.WebSocket;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.LoggerFormat;
