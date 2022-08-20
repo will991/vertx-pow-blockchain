@@ -10,7 +10,7 @@ exit_with_error() {
 ################################## RUN ##################################
 
 if [ -z "$1" ]; then
-    echo "No port number specified - defaulting to 8080"
+    echo "No config file specified - defaulting to ./src/main/resources/config.json"
 fi
 
-java -jar target/will-chain-0.0.1-SNAPSHOT.jar -cluster -Djava.net.preferIPv4Stack=true -Drest.http.port=$1
+java -jar target/will-chain-0.0.1-SNAPSHOT.jar -cluster -conf './src/main/resources/config.json' -Djava.net.preferIPv4Stack=true
