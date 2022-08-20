@@ -19,14 +19,13 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
-        deploy(new RestApiVerticle(blockchain), new DeploymentOptions())
+        deploy(new RestApiVerticle(blockchain), new DeploymentOptions().setConfig(config()))
             .compose(r -> deploy(new BlockchainSyncVerticle(blockchain), new DeploymentOptions()))
             .onSuccess(startPromise::complete)
             .onFailure(startPromise::fail);
     }
 
     private <T extends AbstractVerticle> Future<Void> deploy(T verticle, DeploymentOptions opts) {
-        LOGGER.info("Deploying " + verticle.getClass().getSimpleName());
         Promise<Void> promise = Promise.promise();
         vertx
             .deployVerticle(verticle, opts)
@@ -35,7 +34,7 @@ public class MainVerticle extends AbstractVerticle {
                 promise.complete();
             })
             .onFailure(err -> {
-                LOGGER.error(format("Failed deploying: %s", verticle.getClass().getSimpleName()), err);
+                LOGGER.error(format("Failed deploying: %s", verticle.getClass().getSimpleName()));
                 promise.fail(err);
             });
         return promise.future();

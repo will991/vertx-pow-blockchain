@@ -7,6 +7,8 @@ import io.vertx.core.http.HttpServer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import static io.vertx.core.Future.succeededFuture;
+
 @Getter
 @RequiredArgsConstructor
 public final class RestApiVerticle extends AbstractHttpServerVerticle {
@@ -15,16 +17,8 @@ public final class RestApiVerticle extends AbstractHttpServerVerticle {
 
     @Override
     protected Future<HttpServer> configureHttpServer(HttpServer server) {
-        return Future.succeededFuture(
+        return succeededFuture(
             server.requestHandler(new RestApiRouter(vertx, blockchain))
         );
     }
-
-    @Override
-    protected String getPortConfigKey() {
-        return "rest.http.port";
-    }
-
-    @Override
-    protected int getDefaultPort() { return 8080; }
 }
