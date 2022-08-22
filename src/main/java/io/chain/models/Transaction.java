@@ -3,7 +3,9 @@ package io.chain.models;
 import com.starkbank.ellipticcurve.Ecdsa;
 import com.starkbank.ellipticcurve.PublicKey;
 import com.starkbank.ellipticcurve.Signature;
+import io.chain.models.exceptions.*;
 import io.vertx.core.buffer.Buffer;
+import lombok.ToString;
 import lombok.Value;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Value
+@ToString
 public class Transaction implements Hashable {
 
     private final List<Input> inputs;
@@ -118,26 +121,41 @@ public class Transaction implements Hashable {
      */
 
     public static boolean isValid(Transaction tx, UTxOSet currentUtxoSet) {
+        try {
+            validate(tx, currentUtxoSet);
+            return true;
+        } catch (TransactionValidationException e) {
+            return false;
+        }
+    }
+
+    public static void validate(Transaction tx, UTxOSet currentUtxoSet) throws TransactionValidationException {
         final UTxOSet newUtxoSet = new UTxOSet();
         int inSum = 0;
         int outSum = 0;
 
         for (int i = 0; i < tx.getInputs().size(); i++) {
             final Input input = tx.getInputs().get(i);
-            if ( ! currentUtxoSet.contains(input)) return false; // prevent double spending
+            if ( ! currentUtxoSet.contains(input)) // prevent double spending
+                throw new DoubleSpendException(input, tx);
             final UTxO utxo = currentUtxoSet.get(input);
             final String verifiableData = Buffer.buffer(tx.getRawDataToSign(i)).toString(StandardCharsets.UTF_8);
-            if ( ! Ecdsa.verify(verifiableData, input.getSignature(), utxo.getTxOut().getAddress())) return false;
-            if (newUtxoSet.contains(input)) return false; // utxo consumed multiple times in same tx
+            if ( ! Ecdsa.verify(verifiableData, input.getSignature(), utxo.getTxOut().getAddress()))
+                throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
+            if (newUtxoSet.contains(input))
+                throw new DoubleSpendException(input, tx); // utxo consumed multiple times in same tx
             newUtxoSet.add(utxo);
             inSum += utxo.getTxOut().getAmount();
         }
 
         for (Output out: tx.getOutputs()) {
-            if (out.getAmount() <= 0) return false;  // check no negative output amounts
+            if (out.getAmount() <= 0)
+                throw new InvalidOutputValueException(out, tx);  // check no negative output amounts
             outSum += out.getAmount();
         }
-        return inSum >= outSum;
+
+        if (inSum < outSum)
+            throw new UnbalancedTransactionException(inSum, outSum, tx);
     }
 
     public static String hash(Transaction tx) {

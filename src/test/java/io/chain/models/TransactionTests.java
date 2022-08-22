@@ -2,6 +2,10 @@ package io.chain.models;
 
 import com.starkbank.ellipticcurve.PrivateKey;
 import com.starkbank.ellipticcurve.PublicKey;
+import io.chain.models.exceptions.DoubleSpendException;
+import io.chain.models.exceptions.MissingSignatureException;
+import io.chain.models.exceptions.TransactionValidationException;
+import io.chain.models.exceptions.UnbalancedTransactionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +17,7 @@ import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public final class TransactionTests {
 
@@ -45,6 +50,12 @@ public final class TransactionTests {
         utxoSet.add(wallet.getUtxos().get(0));
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(true);
 
+        try {
+            Transaction.validate(signedTx, utxoSet);
+        } catch (TransactionValidationException e) {
+            fail("No Transaction validation exception expected", e);
+        }
+
         utxoSet.process(Arrays.asList(signedTx));
         assertThat(utxoSet.contains(wallet.getUtxos().get(0))).isEqualTo(false);
         final Set<UTxO> w1UTxos = utxoSet.filterBy(pk);
@@ -71,8 +82,46 @@ public final class TransactionTests {
 
         Transaction signedTx = wallet.sign(unsignedTx);
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
+
+        try {
+            Transaction.validate(signedTx, utxoSet);
+            fail("Expected input to not be spendable");
+        } catch (DoubleSpendException e) {
+            /* expected */
+        } catch (TransactionValidationException e) {
+            fail("No other validation exception expected", e);
+        }
     }
 
+    @Test
+    @DisplayName("test invalid signature")
+    void testInvalidSignature() {
+        final Wallet recipient = new Wallet();
+
+        Transaction unsignedTx = new Transaction(
+                Arrays.asList(
+                    wallet.getUtxos().get(0).getTxIn(),
+                    wallet.getUtxos().get(0).getTxIn()
+                ),
+                Arrays.asList(
+                        new Output(pk, 30),
+                        new Output(recipient.getPk(), 20)
+                ),
+                null);
+
+        Transaction signedTx = recipient.sign(unsignedTx);
+        utxoSet.add(wallet.getUtxos().get(0));
+        assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
+
+        try {
+            Transaction.validate(signedTx, utxoSet);
+            fail("Expected missing signature exception");
+        } catch (MissingSignatureException e) {
+            /* expected */
+        } catch (TransactionValidationException e) {
+            fail("No other validation exception expected", e);
+        }
+    }
 
     @Test
     @DisplayName("test double spending within same tx")
@@ -93,6 +142,15 @@ public final class TransactionTests {
         Transaction signedTx = wallet.sign(unsignedTx);
         utxoSet.add(wallet.getUtxos().get(0));
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
+
+        try {
+            Transaction.validate(signedTx, utxoSet);
+            fail("Expected double spend exception");
+        }  catch (DoubleSpendException e) {
+            /* expected */
+        } catch (TransactionValidationException e) {
+            fail("No other validation exception expected", e);
+        }
     }
 
     @Test
@@ -111,5 +169,14 @@ public final class TransactionTests {
         Transaction signedTx = wallet.sign(unsignedTx);
         utxoSet.add(wallet.getUtxos().get(0));
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
+
+        try {
+            Transaction.validate(signedTx, utxoSet);
+            fail("Expected unbalanced transaction exception");
+        }  catch (UnbalancedTransactionException e) {
+            /* expected */
+        } catch (TransactionValidationException e) {
+            fail("No other validation exception expected", e);
+        }
     }
 }
