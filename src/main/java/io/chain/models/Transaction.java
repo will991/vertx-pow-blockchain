@@ -140,6 +140,8 @@ public class Transaction implements Hashable {
                 throw new DoubleSpendException(input, tx);
             final UTxO utxo = currentUtxoSet.get(input);
             final String verifiableData = Buffer.buffer(tx.getRawDataToSign(i)).toString(StandardCharsets.UTF_8);
+            if (input.getSignature() == null)
+                throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
             if ( ! Ecdsa.verify(verifiableData, input.getSignature(), utxo.getTxOut().getAddress()))
                 throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
             if (newUtxoSet.contains(input))

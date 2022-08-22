@@ -11,8 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Collections;
 import java.util.Set;
 
 import static java.util.Collections.singletonList;
@@ -111,6 +110,34 @@ public final class TransactionTests {
 
         Transaction signedTx = recipient.sign(unsignedTx);
         utxoSet.add(wallet.getUtxos().get(0));
+        assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
+
+        try {
+            Transaction.validate(signedTx, utxoSet);
+            fail("Expected missing signature exception");
+        } catch (MissingSignatureException e) {
+            /* expected */
+        } catch (TransactionValidationException e) {
+            fail("No other validation exception expected", e);
+        }
+    }
+
+    @Test
+    @DisplayName("test missing signature")
+    void testMissingSignature() {
+        final Wallet recipient = new Wallet();
+
+        Transaction unsignedTx = new Transaction(
+                Collections.singletonList(wallet.getUtxos().get(0).getTxIn()),
+                Arrays.asList(
+                    new Output(pk, 30),
+                    new Output(recipient.getPk(), 20)
+                ),
+                null);
+
+        utxoSet.add(wallet.getUtxos().get(0));
+        Transaction signedTx = wallet.sign(unsignedTx);
+        wallet.getUtxos().get(0).getTxIn().addSignature(null);
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
 
         try {
