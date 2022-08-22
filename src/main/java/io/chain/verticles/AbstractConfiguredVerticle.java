@@ -34,6 +34,9 @@ abstract class AbstractConfiguredVerticle extends AbstractVerticle {
             .getConfig()
             .compose(config -> succeededFuture(config.mergeIn(config())))
             .onSuccess(config -> {
+                if (System.getProperty("http.port") != null) {
+                    config.getJsonObject("http").put("port", Integer.valueOf(System.getProperty("http.port")));
+                }
                 LOGGER.info(format("Retrieved configuration:%s%s", lineSeparator(), config.encodePrettily()));
                 promise.complete(config);
             })
