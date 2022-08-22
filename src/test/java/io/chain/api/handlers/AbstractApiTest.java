@@ -13,7 +13,7 @@ import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 
-abstract class AbstractApiTest extends AbstractVerticleTest {
+public abstract class AbstractApiTest extends AbstractVerticleTest {
     private final static int DEFAULT_TEST_PORT = 9001;
 
     protected final ObjectMapper mapper = new ObjectMapper();

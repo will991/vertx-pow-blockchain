@@ -12,6 +12,8 @@ import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 
+import java.util.UUID;
+
 import static java.lang.String.format;
 
 public class MainVerticle extends AbstractVerticle {
@@ -19,12 +21,13 @@ public class MainVerticle extends AbstractVerticle {
 
     private final UTxOSet utxos = new UTxOSet();
     private final Blockchain blockchain = new Blockchain();
+    private final String uuid = UUID.randomUUID().toString();
 
     @Override
     public void start(Promise<Void> startPromise) {
         deploy(new RestApiVerticle(blockchain), new DeploymentOptions().setConfig(config()))
-            .compose(r -> deploy(new BlockchainSyncVerticle(blockchain, utxos), new DeploymentOptions()))
-            .compose(r -> deploy(new TransactionPoolManagerVerticle(utxos), new DeploymentOptions().setConfig(config())))
+            .compose(r -> deploy(new BlockchainSyncVerticle(blockchain, utxos, uuid), new DeploymentOptions()))
+            .compose(r -> deploy(new TransactionPoolManagerVerticle(uuid, utxos), new DeploymentOptions().setConfig(config())))
             .onSuccess(startPromise::complete)
             .onFailure(startPromise::fail);
     }

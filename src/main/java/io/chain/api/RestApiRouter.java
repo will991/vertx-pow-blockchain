@@ -2,6 +2,7 @@ package io.chain.api;
 
 import io.chain.api.handlers.GetBlockCountHandler;
 import io.chain.api.handlers.GetBlocksHandler;
+import io.chain.api.handlers.GetMemPoolTransactionsHandler;
 import io.chain.api.handlers.MineBlockHandler;
 import io.chain.models.Blockchain;
 import io.vertx.core.Vertx;
@@ -23,6 +24,10 @@ public final class RestApiRouter extends RouterImpl {
         get("/blocks")
             .handler(new GetBlocksHandler(blockchain))
             .setName("Get Blocks");
+
+        get("/mempool")
+                .handler(new GetMemPoolTransactionsHandler(vertx))
+                .setName("Get MemPool Transactions");
 
 //        get("/block/:blockHash")
 //        get("/transaction/:txHash")

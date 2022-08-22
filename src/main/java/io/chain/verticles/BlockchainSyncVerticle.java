@@ -7,8 +7,6 @@ import io.vertx.core.json.JsonArray;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.UUID;
-
 import static io.chain.p2p.EventBusAddresses.NEW_BLOCKCHAIN;
 
 @Getter
@@ -17,7 +15,7 @@ public final class BlockchainSyncVerticle extends AbstractEventBusVerticle {
 
     private final Blockchain blockchain;
     private final UTxOSet utxos;
-    private final String uuid = UUID.randomUUID().toString();
+    private final String uuid;
 
     @Override
     public void start() {

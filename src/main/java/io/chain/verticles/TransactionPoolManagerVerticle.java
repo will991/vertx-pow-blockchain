@@ -15,25 +15,28 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import static io.chain.p2p.EventBusAddresses.NEW_TRANSACTION;
+import static java.lang.String.format;
 
 @RequiredArgsConstructor
 public final class TransactionPoolManagerVerticle extends AbstractEventBusVerticle {
 
-    private static final String UNCONFIRMED_TX_POOL = "io.chain.unconfirmed.txs.pool";
+    public static final String UNCONFIRMED_TX_POOL = "io.chain.unconfirmed.txs.pool";
+    private final String uuid;
     private final UTxOSet utxos;
 
     @Override
-    public void start(Promise<Void> startPromise) throws Exception {
-        this.<String>registerLocally(NEW_TRANSACTION, msg -> {
+    public void start(Promise<Void> startPromise) {
+        this.<String>register(NEW_TRANSACTION, msg -> {
             final Transaction tx = Json.decodeValue(msg.body(), Transaction.class);
             if (Transaction.isValid(tx, utxos)) {
-                LOGGER.info("Added transaction to pool");
+                LOGGER.info(format("[%s] Added transaction to pool", uuid));
                 vertx
                     .sharedData()
                     .<String, Transaction>getLocalMap(UNCONFIRMED_TX_POOL)
                     .put(tx.hash(), tx);
             }
         });
+
         initUTxOSet()
             .onSuccess(startPromise::complete)
             .onFailure(startPromise::fail);
@@ -44,7 +47,7 @@ public final class TransactionPoolManagerVerticle extends AbstractEventBusVertic
         try {
             final ObjectMapper mapper = new ObjectMapper();
             List<UTxO> us = mapper.readValue(initialUTxOs.encode(), new TypeReference<>() {});
-            us.forEach(u -> utxos.add(u));
+            us.forEach(utxos::add);
             return Future.succeededFuture();
         } catch (JsonProcessingException e) {
             e.printStackTrace(System.err);

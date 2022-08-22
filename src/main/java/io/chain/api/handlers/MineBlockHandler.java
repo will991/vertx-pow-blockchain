@@ -14,7 +14,7 @@ import static io.chain.p2p.EventBusAddresses.NEW_BLOCKCHAIN;
 
 @Getter
 @AllArgsConstructor
-public class MineBlockHandler implements Handler<RoutingContext> {
+public class MineBlockHandler extends AbstractRouteHandler implements Handler<RoutingContext> {
     private final static Logger LOGGER = LoggerFactory.getLogger(MineBlockHandler.class);
 
     private Blockchain blockchain;
