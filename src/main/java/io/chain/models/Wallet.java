@@ -51,19 +51,6 @@ public final class Wallet {
         this.utxos = utxos;
     }
 
-//    public Wallet (List<UTxO> utxos) throws MismatchingUTxOAddressException {
-//        this.privateKey = new PrivateKey();
-//        this.pubKey = privateKey.publicKey();
-//
-//        final Optional<UTxO> utxo = utxos.stream()
-//                .filter(u -> ! u.getTxOut().getAddress().equals(pubKey))
-//                .findFirst();
-//        if (utxo.isPresent()) {
-//            throw new MismatchingUTxOAddressException(pubKey, utxo.get());
-//        }
-//        this.utxos = utxos;
-//    }
-
     public void addUTxO(final UTxO utxo) throws MismatchingUTxOAddressException {
         if ( ! utxo.getTxOut().getAddress().equals(pk)) {
             throw new MismatchingUTxOAddressException(pk, utxo);
