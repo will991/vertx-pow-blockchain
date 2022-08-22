@@ -89,14 +89,6 @@ public final class Wallet {
                 );
     }
 
-    public String getPEMPublicKey() {
-        return pk.toPem();
-    }
-
-    public String getHexPublicKey() {
-        return Hex.toHexString(pk.toByteString(true).getBytes());
-    }
-
     /*
      * Wallet Exceptions
      */
