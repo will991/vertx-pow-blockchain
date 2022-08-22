@@ -4,7 +4,7 @@ import io.chain.models.Blockchain;
 import io.chain.models.UTxOSet;
 import io.chain.verticles.BlockchainSyncVerticle;
 import io.chain.verticles.RestApiVerticle;
-import io.chain.verticles.TransactionPoolVerticle;
+import io.chain.verticles.TransactionPoolManagerVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -24,7 +24,7 @@ public class MainVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
         deploy(new RestApiVerticle(blockchain), new DeploymentOptions().setConfig(config()))
             .compose(r -> deploy(new BlockchainSyncVerticle(blockchain, utxos), new DeploymentOptions()))
-            .compose(r -> deploy(new TransactionPoolVerticle(utxos), new DeploymentOptions().setConfig(config())))
+            .compose(r -> deploy(new TransactionPoolManagerVerticle(utxos), new DeploymentOptions().setConfig(config())))
             .onSuccess(startPromise::complete)
             .onFailure(startPromise::fail);
     }
