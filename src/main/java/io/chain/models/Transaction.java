@@ -1,6 +1,5 @@
 package io.chain.models;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -27,12 +26,10 @@ public class Transaction implements Hashable, Shareable {
     private final List<Output> outputs;
     byte[] data;
 
-    @JsonCreator
     public Transaction(List<Input> inputs, List<Output> outputs) {
         this(inputs, outputs, null);
     }
 
-    @JsonCreator
     public Transaction(List<Input> inputs, List<Output> outputs, byte[] data) {
         this.inputs = new ArrayList<>(inputs);
         this.outputs = new ArrayList<>(outputs);
