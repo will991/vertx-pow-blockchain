@@ -5,6 +5,7 @@ import com.starkbank.ellipticcurve.PrivateKey;
 import com.starkbank.ellipticcurve.PublicKey;
 import com.starkbank.ellipticcurve.Signature;
 import io.vertx.core.buffer.Buffer;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
 import org.bouncycastle.util.encoders.Hex;
@@ -23,6 +24,7 @@ import static java.lang.System.lineSeparator;
 public final class Wallet {
 
     private final List<UTxO> utxos;
+    @Getter(AccessLevel.PRIVATE)
     private final PrivateKey sk;
     private final PublicKey pk;
 
@@ -111,13 +113,6 @@ public final class Wallet {
                     utxo.getTxOut().getAddress().toByteString(true)
                 )
             );
-        }
-    }
-
-    public static final class InsufficientBalanceException extends Exception {
-
-        public InsufficientBalanceException(Wallet wallet) {
-            super(format("Insufficient balance for spending wallet: %s%s", lineSeparator(), wallet.getHexPublicKey()));
         }
     }
 }

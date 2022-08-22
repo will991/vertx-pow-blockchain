@@ -1,6 +1,7 @@
 package io.chain.models;
 
 import com.starkbank.ellipticcurve.Ecdsa;
+import com.starkbank.ellipticcurve.PrivateKey;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,8 @@ public final class InputTests {
         assertThat(in3).isEqualTo(in2);
         assertThat(in3).isNotEqualTo(in1);
 
-        in3.addSignature(Ecdsa.sign("", new Wallet().getSk()));
+        final PrivateKey sk = new PrivateKey();
+        in3.addSignature(Ecdsa.sign("", sk));
         assertThat(in3).isNotEqualTo(in2);
     }
 }
