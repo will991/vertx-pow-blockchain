@@ -41,6 +41,6 @@ public final class InputTests {
 
         final PrivateKey sk = new PrivateKey();
         in3.addSignature(Ecdsa.sign("", sk));
-        assertThat(in3).isNotEqualTo(in2);
+        assertThat(in3).isEqualTo(in2);
     }
 }

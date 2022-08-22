@@ -1,6 +1,11 @@
 package io.chain.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.starkbank.ellipticcurve.Signature;
+import io.chain.models.serialization.ByteArrayHexSerializer;
+import io.chain.models.serialization.InputDeserializer;
+import io.chain.models.serialization.SignatureHexSerializer;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -9,14 +14,22 @@ import java.util.Objects;
 
 @Getter
 @ToString
+@JsonDeserialize(using = InputDeserializer.class)
 public final class Input implements Comparable<Input> {
+    @JsonSerialize(using = ByteArrayHexSerializer.class)
     private final byte[] txHash;
     private final int index;
-    private Signature signature = null;
+    @JsonSerialize(using = SignatureHexSerializer.class)
+    private Signature signature;
 
     public Input(byte[] prevTxHash, int index) {
+        this(prevTxHash, index, null);
+    }
+
+    public Input(byte[] prevTxHash, int index, Signature signature) {
         txHash = prevTxHash == null ? null : Arrays.copyOf(prevTxHash, prevTxHash.length);
         this.index = index;
+        this.signature = signature;
     }
 
     public void addSignature(Signature sig) {
@@ -28,26 +41,14 @@ public final class Input implements Comparable<Input> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Input input = (Input) o;
-        if (
-            signature == null && input.signature != null ||
-            signature != null && input.signature == null
-        )
-            return false;
-
         return index == input.index
-            && Arrays.equals(txHash, input.txHash)
-            && (
-                signature == null && input.signature == null ||
-                signature.toBase64().equals(input.signature.toBase64())
-            );
+            && Arrays.equals(txHash, input.txHash);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(index);
         result = 31 * result + Arrays.hashCode(txHash);
-        if (signature != null)
-            result = 31 * result + signature.toBase64().hashCode();
         return result;
     }
 
