@@ -2,11 +2,13 @@ package io.chain.models;
 
 import com.starkbank.ellipticcurve.Signature;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 @Getter
+@ToString
 public final class Input implements Comparable<Input> {
     private final byte[] txHash;
     private final int index;

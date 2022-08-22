@@ -4,10 +4,12 @@ package io.chain.models;
 import com.starkbank.ellipticcurve.PublicKey;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.util.Objects;
 
 @Getter
+@ToString
 @RequiredArgsConstructor
 public final class Output {
     private final PublicKey address;
