@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum EventBusAddresses {
-    NEW_BLOCKCHAIN("blockchain.new");
+    NEW_BLOCKCHAIN("blockchain.new"),
+    NEW_TRANSACTION("transaction.new");
 
     private final String address;
 
