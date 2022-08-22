@@ -44,14 +44,17 @@ public final class TransactionPoolManagerVerticle extends AbstractEventBusVertic
 
     private Future<Void> initUTxOSet() {
         final JsonArray initialUTxOs = config().getJsonArray("initialUTxOs");
-        try {
-            final ObjectMapper mapper = new ObjectMapper();
-            List<UTxO> us = mapper.readValue(initialUTxOs.encode(), new TypeReference<>() {});
-            us.forEach(utxos::add);
-            return Future.succeededFuture();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace(System.err);
-            return Future.failedFuture(e);
+        if (initialUTxOs != null) {
+            try {
+                final ObjectMapper mapper = new ObjectMapper();
+                List<UTxO> us = mapper.readValue(initialUTxOs.encode(), new TypeReference<>() {});
+                us.forEach(utxos::add);
+                return Future.succeededFuture();
+            } catch (JsonProcessingException e) {
+                e.printStackTrace(System.err);
+                return Future.failedFuture(e);
+            }
         }
+        return Future.succeededFuture();
     }
 }
