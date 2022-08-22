@@ -34,8 +34,6 @@ public final class Input implements Comparable<Input> {
         )
             return false;
 
-
-
         return index == input.index
             && Arrays.equals(txHash, input.txHash)
             && (
