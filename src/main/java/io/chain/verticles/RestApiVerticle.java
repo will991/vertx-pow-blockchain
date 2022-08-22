@@ -2,6 +2,7 @@ package io.chain.verticles;
 
 import io.chain.api.RestApiRouter;
 import io.chain.models.Blockchain;
+import io.chain.models.Wallet;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServer;
 import lombok.Getter;
@@ -14,11 +15,12 @@ import static io.vertx.core.Future.succeededFuture;
 public final class RestApiVerticle extends AbstractHttpServerVerticle {
 
     private final Blockchain blockchain;
+    private final Wallet wallet;
 
     @Override
     protected Future<HttpServer> configureHttpServer(HttpServer server) {
         return succeededFuture(
-            server.requestHandler(new RestApiRouter(vertx, blockchain))
+            server.requestHandler(new RestApiRouter(vertx, blockchain, wallet))
         );
     }
 }

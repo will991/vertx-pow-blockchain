@@ -1,10 +1,8 @@
 package io.chain.api;
 
-import io.chain.api.handlers.GetBlockCountHandler;
-import io.chain.api.handlers.GetBlocksHandler;
-import io.chain.api.handlers.GetMemPoolTransactionsHandler;
-import io.chain.api.handlers.MineBlockHandler;
+import io.chain.api.handlers.*;
 import io.chain.models.Blockchain;
+import io.chain.models.Wallet;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
@@ -14,7 +12,7 @@ import io.vertx.ext.web.impl.RouterImpl;
 
 public final class RestApiRouter extends RouterImpl {
 
-    public RestApiRouter(Vertx vertx, Blockchain blockchain) {
+    public RestApiRouter(Vertx vertx, Blockchain blockchain, Wallet wallet) {
         super(vertx);
 
         route()
@@ -31,7 +29,11 @@ public final class RestApiRouter extends RouterImpl {
 
 //        get("/block/:blockHash")
 //        get("/transaction/:txHash")
-//        post("/transaction")
+        post("/transaction")
+            .handler(BodyHandler.create())
+            .handler(new CreateTransactionHandler(vertx, wallet))
+            .handler(new GetMemPoolTransactionsHandler(vertx))
+            .setName("Add a transaction");
 
         get("/blockCount")
             .handler(new GetBlockCountHandler(blockchain))
