@@ -9,6 +9,6 @@ import static java.lang.String.format;
 public final class MissingSignatureException extends TransactionValidationException {
 
     public MissingSignatureException(PublicKey pk, Transaction tx) {
-        super(tx, format("Missing signature of public key: %s", Hex.toHexString(pk.toByteString(true).getBytes())));
+        super(tx, format("Missing signature of public key: %s", Hex.toHexString(pk.toByteString().getBytes())));
     }
 }

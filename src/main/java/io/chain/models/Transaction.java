@@ -79,7 +79,7 @@ public class Transaction implements Hashable, Shareable {
             for (int i = 0; i < amountBuffer.length(); i++)
                 signData.add(amountBuffer.getByte(i));
 
-            final byte[] address = out.getAddress().toByteString(true).getBytes();
+            final byte[] address = out.getAddress().toByteString().getBytes();
             for (int i = 0; i < address.length; i++)
                 signData.add(address[i]);
         }
@@ -115,7 +115,7 @@ public class Transaction implements Hashable, Shareable {
             for (int i = 0; i < amountBuffer.length(); i++)
                 rawTx.add(amountBuffer.getByte(i));
 
-            final byte[] outAddress = out.getAddress().toByteString(true).getBytes();
+            final byte[] outAddress = out.getAddress().toByteString().getBytes();
             for (int i = 0; i < outAddress.length; i++)
                 rawTx.add(outAddress[i]);
         }

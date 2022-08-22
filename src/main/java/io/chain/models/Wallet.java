@@ -9,6 +9,7 @@ import io.vertx.core.buffer.Buffer;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -141,9 +142,9 @@ public final class Wallet {
                 format(
                     "UTxO does not belong to Wallet. Mismatching wallet public key.%sExpected: %s%sActual: %s",
                     lineSeparator(),
-                    pk.toByteString(true),
+                    Hex.toHexString(pk.toByteString().getBytes()),
                     lineSeparator(),
-                    utxo.getTxOut().getAddress().toByteString(true)
+                    Hex.toHexString(utxo.getTxOut().getAddress().toByteString().getBytes())
                 )
             );
         }

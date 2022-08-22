@@ -51,7 +51,6 @@ public final class WalletTests {
             fail("Expected InsufficientUTxOBalanceException");
         } catch (InsufficientUTxOBalanceException e) {
             /* expected */
-            e.printStackTrace(System.out);
         }
     }
 
