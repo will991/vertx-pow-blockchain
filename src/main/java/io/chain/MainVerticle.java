@@ -1,8 +1,10 @@
 package io.chain;
 
 import io.chain.models.Blockchain;
+import io.chain.models.UTxOSet;
 import io.chain.verticles.BlockchainSyncVerticle;
 import io.chain.verticles.RestApiVerticle;
+import io.chain.verticles.TransactionPoolVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -15,12 +17,14 @@ import static java.lang.String.format;
 public class MainVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
 
+    private final UTxOSet utxos = new UTxOSet();
     private final Blockchain blockchain = new Blockchain();
 
     @Override
     public void start(Promise<Void> startPromise) {
         deploy(new RestApiVerticle(blockchain), new DeploymentOptions().setConfig(config()))
-            .compose(r -> deploy(new BlockchainSyncVerticle(blockchain), new DeploymentOptions()))
+            .compose(r -> deploy(new BlockchainSyncVerticle(blockchain, utxos), new DeploymentOptions()))
+            .compose(r -> deploy(new TransactionPoolVerticle(utxos), new DeploymentOptions().setConfig(config())))
             .onSuccess(startPromise::complete)
             .onFailure(startPromise::fail);
     }
