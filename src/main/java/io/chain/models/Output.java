@@ -1,7 +1,11 @@
 package io.chain.models;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.starkbank.ellipticcurve.PublicKey;
+import io.chain.models.serialization.OutputDeserializer;
+import io.chain.models.serialization.PublicKeyHexSerializer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -11,7 +15,9 @@ import java.util.Objects;
 @Getter
 @ToString
 @RequiredArgsConstructor
+@JsonDeserialize(using = OutputDeserializer.class)
 public final class Output {
+    @JsonSerialize(using = PublicKeyHexSerializer.class)
     private final PublicKey address;
     private final int amount;
 

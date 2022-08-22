@@ -1,10 +1,15 @@
 package io.chain.models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.starkbank.ellipticcurve.Ecdsa;
-import com.starkbank.ellipticcurve.PublicKey;
-import com.starkbank.ellipticcurve.Signature;
 import io.chain.models.exceptions.*;
+import io.chain.models.serialization.TransactionDeserializer;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.Shareable;
 import lombok.ToString;
 import lombok.Value;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -15,28 +20,40 @@ import java.util.List;
 
 @Value
 @ToString
-public class Transaction implements Hashable {
+@JsonDeserialize(using = TransactionDeserializer.class)
+public class Transaction implements Hashable, Shareable {
 
     private final List<Input> inputs;
     private final List<Output> outputs;
     byte[] data;
 
-    public Transaction(List<Input> ins, List<Output> outs, byte[] data) {
-        this.inputs = new ArrayList<>(ins);
-        this.outputs = new ArrayList<>(outs);
+    @JsonCreator
+    public Transaction(List<Input> inputs, List<Output> outputs) {
+        this(inputs, outputs, null);
+    }
+
+    @JsonCreator
+    public Transaction(List<Input> inputs, List<Output> outputs, byte[] data) {
+        this.inputs = new ArrayList<>(inputs);
+        this.outputs = new ArrayList<>(outputs);
         this.data = data;
     }
 
-    public boolean addInput(String txHash, int outIdx) {
-        return inputs.add(new Input(txHash.getBytes(StandardCharsets.UTF_8), outIdx));
-    }
+    public JsonObject toJson() {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonObject result = new JsonObject();
 
-    public boolean addOutput(int amount, PublicKey address) {
-        return outputs.add(new Output(address, amount));
-    }
+        try {
+            result.put("inputs", Buffer.buffer(mapper.writeValueAsString(inputs)).toJsonArray());
+            result.put("outputs", Buffer.buffer(mapper.writeValueAsString(outputs)).toJsonArray());
+            if (data != null) {
+                result.put("data", Buffer.buffer(mapper.writeValueAsString(data)).toString());
+            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
-    public void addSignature(Signature signature, int idx) {
-        inputs.get(idx).addSignature(signature);
+        return result;
     }
 
     @Override

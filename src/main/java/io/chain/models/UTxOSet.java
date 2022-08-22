@@ -1,7 +1,6 @@
 package io.chain.models;
 
 import com.starkbank.ellipticcurve.PublicKey;
-import lombok.Getter;
 
 import java.util.*;
 
