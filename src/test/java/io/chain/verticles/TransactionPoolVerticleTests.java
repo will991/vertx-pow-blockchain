@@ -1,11 +1,8 @@
 package io.chain.verticles;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.chain.models.*;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxTestContext;
-import org.bouncycastle.util.encoders.Hex;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +40,7 @@ public final class TransactionPoolVerticleTests extends AbstractVerticleTest {
 
     @Test
     @DisplayName("test valid transaction to be added to pool")
-    void testValidTransactionPooling(Vertx vertx, VertxTestContext context) throws JsonProcessingException {
+    void testValidTransactionPooling(Vertx vertx, VertxTestContext context) {
         assertThat(vertx.sharedData().getLocalMap(UNCONFIRMED_TX_POOL).isEmpty()).isEqualTo(true);
 
         vertx.eventBus().publish(
