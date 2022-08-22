@@ -17,7 +17,7 @@ import java.util.List;
 import static io.chain.p2p.EventBusAddresses.NEW_TRANSACTION;
 
 @RequiredArgsConstructor
-public final class TransactionPoolVerticle extends AbstractEventBusVerticle {
+public final class TransactionPoolManagerVerticle extends AbstractEventBusVerticle {
 
     private static final String UNCONFIRMED_TX_POOL = "io.chain.unconfirmed.txs.pool";
     private final UTxOSet utxos;
