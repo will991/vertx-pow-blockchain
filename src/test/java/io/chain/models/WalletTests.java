@@ -1,5 +1,9 @@
 package io.chain.models;
 
+import com.starkbank.ellipticcurve.PrivateKey;
+import com.starkbank.ellipticcurve.PublicKey;
+import io.chain.models.exceptions.InsufficientUTxOBalanceException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -9,17 +13,19 @@ import static org.assertj.core.api.Assertions.fail;
 @DisplayName("Wallet Tests")
 public final class WalletTests {
 
+    private Wallet wallet;
+
+    @BeforeEach
+    void setup() throws Wallet.MismatchingUTxOAddressException {
+        wallet = new Wallet();
+        final UTxO utxo = new UTxO(new Input("123".getBytes(), 0), new Output(wallet.getPk(), 50));
+        wallet.addUTxO(utxo);
+    }
+
     @Test
     @DisplayName("test wallet balance and addition of utxo")
     void testWalletBalance() {
-        try {
-            final Wallet wallet = new Wallet();
-            final UTxO utxo = new UTxO(new Input("123".getBytes(), 0), new Output(wallet.getPk(), 50));
-            wallet.addUTxO(utxo);
-            assertThat(wallet.balance()).isEqualTo(50);
-        } catch (Wallet.MismatchingUTxOAddressException e) {
-            fail("No exception expected", e);
-        }
+        assertThat(wallet.balance()).isEqualTo(50);
     }
 
     @Test
@@ -33,6 +39,53 @@ public final class WalletTests {
             fail("Expected MismatchingUTxOAddressException exception");
         } catch (Wallet.MismatchingUTxOAddressException e) {
             /* expected */
+        }
+    }
+
+    @Test
+    @DisplayName("test transaction construction with insufficient UTxO set")
+    void testWalletTxConstructionWithInsuffiecientUTxOSet() {
+        final PublicKey pk = new PrivateKey().publicKey();
+        try {
+            wallet.create(pk, 55);
+            fail("Expected InsufficientUTxOBalanceException");
+        } catch (InsufficientUTxOBalanceException e) {
+            /* expected */
+            e.printStackTrace(System.out);
+        }
+    }
+
+    @Test
+    @DisplayName("test transaction construction with sufficient UTxO set")
+    void testWalletTxConstructionWithSuffiecientUTxOSet() {
+        final PublicKey recipient = new PrivateKey().publicKey();
+        try {
+            Transaction transaction = wallet.create(recipient, 35);
+            assertThat(transaction.getInputs().size()).isEqualTo(1);
+            assertThat(transaction.getOutputs().size()).isEqualTo(2);
+            assertThat(transaction.getOutputs().get(0).getAmount()).isEqualTo(35);
+            assertThat(transaction.getOutputs().get(0).getAddress()).isEqualTo(recipient);
+            assertThat(transaction.getOutputs().get(1).getAmount()).isEqualTo(15);
+            assertThat(transaction.getOutputs().get(1).getAddress()).isEqualTo(wallet.getPk());
+            assertThat(transaction.getData()).isNull();
+        } catch (InsufficientUTxOBalanceException e) {
+            fail("Expected InsufficientUTxOBalanceException");
+        }
+    }
+
+    @Test
+    @DisplayName("test transaction construction with sufficient UTxO set and no change")
+    void testWalletTxConstructionWithSuffiecientUTxOSetAndNoChange() {
+        final PublicKey recipient = new PrivateKey().publicKey();
+        try {
+            Transaction transaction = wallet.create(recipient, 50);
+            assertThat(transaction.getInputs().size()).isEqualTo(1);
+            assertThat(transaction.getOutputs().size()).isEqualTo(1);
+            assertThat(transaction.getOutputs().get(0).getAmount()).isEqualTo(50);
+            assertThat(transaction.getOutputs().get(0).getAddress()).isEqualTo(recipient);
+            assertThat(transaction.getData()).isNull();
+        } catch (InsufficientUTxOBalanceException e) {
+            fail("Expected no exception");
         }
     }
 }

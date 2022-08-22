@@ -39,7 +39,7 @@ public final class TransactionPoolVerticleTests extends AbstractApiTest {
             e.printStackTrace();
         }
         UTxOSet uTxOSet = new UTxOSet();
-        uTxOSet.add(wallet.getUtxos().get(0));
+        uTxOSet.add(wallet.getUTxOs().get(0));
         return uTxOSet;
     }
 

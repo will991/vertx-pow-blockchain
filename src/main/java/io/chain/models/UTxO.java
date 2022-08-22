@@ -11,9 +11,14 @@ import lombok.Value;
 @ToString
 @RequiredArgsConstructor
 @JsonDeserialize(using = UTxODeserializer.class)
-public class UTxO {
+public class UTxO implements Comparable<UTxO> {
     @JsonProperty("input")
     Input txIn;
     @JsonProperty("output")
     Output txOut;
+
+    @Override
+    public int compareTo(UTxO o) {
+        return Integer.compare(txOut.getAmount(), o.getTxOut().getAmount());
+    }
 }

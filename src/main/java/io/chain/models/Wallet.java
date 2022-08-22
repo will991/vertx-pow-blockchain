@@ -4,28 +4,28 @@ import com.starkbank.ellipticcurve.Ecdsa;
 import com.starkbank.ellipticcurve.PrivateKey;
 import com.starkbank.ellipticcurve.PublicKey;
 import com.starkbank.ellipticcurve.Signature;
+import io.chain.models.exceptions.InsufficientUTxOBalanceException;
 import io.vertx.core.buffer.Buffer;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
+import static java.util.Collections.unmodifiableList;
 
-@Getter
 @ToString
 public final class Wallet {
 
     private final List<UTxO> utxos;
     @Getter(AccessLevel.PRIVATE)
     private final PrivateKey sk;
+    @Getter
     private final PublicKey pk;
 
     public Wallet () {
@@ -48,14 +48,34 @@ public final class Wallet {
         if (utxo.isPresent()) {
             throw new MismatchingUTxOAddressException(this.pk, utxo.get());
         }
+        Collections.sort(utxos, Collections.reverseOrder());
         this.utxos = utxos;
+    }
+
+    public List<UTxO> getUTxOs() {
+        return unmodifiableList(utxos);
     }
 
     public void addUTxO(final UTxO utxo) throws MismatchingUTxOAddressException {
         if ( ! utxo.getTxOut().getAddress().equals(pk)) {
             throw new MismatchingUTxOAddressException(pk, utxo);
         }
-        utxos.add(utxo);
+
+        if (utxos.isEmpty()) {
+            utxos.add(utxo);
+            return;
+        }
+
+        for (int i = 0; i < utxos.size(); i++) {
+            final UTxO u = utxos.get(i);
+            if (u.getTxOut().getAmount() < utxo.getTxOut().getAmount()) {
+                utxos.add(i, utxo);
+                break;
+            } else if (i == utxos.size() - 1) {
+                utxos.add(utxo);
+                break;
+            }
+        }
     }
 
     public Transaction sign(Transaction tx) {
@@ -65,6 +85,40 @@ public final class Wallet {
             tx.getInputs().get(i).addSignature(signature);
         }
         return tx;
+    }
+
+    public Transaction create(PublicKey recipient, int amount) throws InsufficientUTxOBalanceException {
+        return create(recipient, amount, null);
+    }
+
+    public Transaction create(PublicKey recipient, int amount, byte[] data) throws InsufficientUTxOBalanceException {
+        final List<UTxO> availableUTxOs = new ArrayList<>(getUTxOs());
+        final List<UTxO> selectedUTxOs = new ArrayList<>();
+        final Function<List<UTxO>, Integer> calculateBalance = us ->
+                us.parallelStream()
+                    .reduce(0,
+                        (acc, utxo) -> acc + utxo.getTxOut().getAmount(),
+                        Integer::sum
+                    );
+
+        do {
+            if (availableUTxOs.isEmpty()) {
+                throw new InsufficientUTxOBalanceException(amount, balance());
+            }
+            selectedUTxOs.add(availableUTxOs.remove(0));
+        } while (calculateBalance.apply(selectedUTxOs) < amount);
+
+        final List<Input> txInputs = selectedUTxOs.stream().map(UTxO::getTxIn).collect(Collectors.toList());
+        final List<Output> txOutputs = new ArrayList<>(
+            Arrays.asList(
+                new Output(recipient, amount)
+            )
+        );
+        final int change = calculateBalance.apply(selectedUTxOs) - amount;
+        if (change > 0) {
+            txOutputs.add(new Output(pk, change));
+        }
+        return new Transaction(txInputs, txOutputs, data);
     }
 
     public int balance() {

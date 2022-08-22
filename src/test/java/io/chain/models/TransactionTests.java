@@ -24,6 +24,7 @@ public final class TransactionTests {
     private final PublicKey pk = sk.publicKey();
     private Wallet wallet;
     private UTxOSet utxoSet;
+    private Transaction unsignedTx;
 
     @BeforeEach
     void setupWallet() throws Wallet.MismatchingUTxOAddressException {
@@ -38,7 +39,7 @@ public final class TransactionTests {
         final Wallet recipient = new Wallet();
 
         Transaction unsignedTx = new Transaction(
-                singletonList(wallet.getUtxos().get(0).getTxIn()),
+                singletonList(wallet.getUTxOs().get(0).getTxIn()),
                 Arrays.asList(
                     new Output(pk, 30),
                     new Output(recipient.getPk(), 20)
@@ -46,7 +47,7 @@ public final class TransactionTests {
                 null);
 
         Transaction signedTx = wallet.sign(unsignedTx);
-        utxoSet.add(wallet.getUtxos().get(0));
+        utxoSet.add(wallet.getUTxOs().get(0));
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(true);
 
         try {
@@ -56,7 +57,7 @@ public final class TransactionTests {
         }
 
         utxoSet.process(Arrays.asList(signedTx));
-        assertThat(utxoSet.contains(wallet.getUtxos().get(0))).isEqualTo(false);
+        assertThat(utxoSet.contains(wallet.getUTxOs().get(0))).isEqualTo(false);
         final Set<UTxO> w1UTxos = utxoSet.filterBy(pk);
         assertThat(w1UTxos.size()).isEqualTo(1);
         assertThat(w1UTxos.stream().findFirst().get().getTxOut().getAmount()).isEqualTo(30);
@@ -72,7 +73,7 @@ public final class TransactionTests {
         final Wallet recipient = new Wallet();
 
         Transaction unsignedTx = new Transaction(
-                singletonList(wallet.getUtxos().get(0).getTxIn()),
+                singletonList(wallet.getUTxOs().get(0).getTxIn()),
                 Arrays.asList(
                     new Output(pk, 30),
                     new Output(recipient.getPk(), 20)
@@ -99,8 +100,8 @@ public final class TransactionTests {
 
         Transaction unsignedTx = new Transaction(
                 Arrays.asList(
-                    wallet.getUtxos().get(0).getTxIn(),
-                    wallet.getUtxos().get(0).getTxIn()
+                    wallet.getUTxOs().get(0).getTxIn(),
+                    wallet.getUTxOs().get(0).getTxIn()
                 ),
                 Arrays.asList(
                         new Output(pk, 30),
@@ -109,7 +110,7 @@ public final class TransactionTests {
                 null);
 
         Transaction signedTx = recipient.sign(unsignedTx);
-        utxoSet.add(wallet.getUtxos().get(0));
+        utxoSet.add(wallet.getUTxOs().get(0));
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
 
         try {
@@ -128,16 +129,16 @@ public final class TransactionTests {
         final Wallet recipient = new Wallet();
 
         Transaction unsignedTx = new Transaction(
-                Collections.singletonList(wallet.getUtxos().get(0).getTxIn()),
+                Collections.singletonList(wallet.getUTxOs().get(0).getTxIn()),
                 Arrays.asList(
                     new Output(pk, 30),
                     new Output(recipient.getPk(), 20)
                 ),
                 null);
 
-        utxoSet.add(wallet.getUtxos().get(0));
+        utxoSet.add(wallet.getUTxOs().get(0));
         Transaction signedTx = wallet.sign(unsignedTx);
-        wallet.getUtxos().get(0).getTxIn().addSignature(null);
+        wallet.getUTxOs().get(0).getTxIn().addSignature(null);
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
 
         try {
@@ -157,8 +158,8 @@ public final class TransactionTests {
 
         Transaction unsignedTx = new Transaction(
                 Arrays.asList(
-                    wallet.getUtxos().get(0).getTxIn(),
-                    wallet.getUtxos().get(0).getTxIn()
+                    wallet.getUTxOs().get(0).getTxIn(),
+                    wallet.getUTxOs().get(0).getTxIn()
                 ),
                 Arrays.asList(
                         new Output(pk, 30),
@@ -167,7 +168,7 @@ public final class TransactionTests {
                 null);
 
         Transaction signedTx = wallet.sign(unsignedTx);
-        utxoSet.add(wallet.getUtxos().get(0));
+        utxoSet.add(wallet.getUTxOs().get(0));
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
 
         try {
@@ -186,7 +187,7 @@ public final class TransactionTests {
         final Wallet recipient = new Wallet();
 
         Transaction unsignedTx = new Transaction(
-                singletonList(wallet.getUtxos().get(0).getTxIn()),
+                singletonList(wallet.getUTxOs().get(0).getTxIn()),
                 Arrays.asList(
                         new Output(pk, 30),
                         new Output(recipient.getPk(), 55)
@@ -194,7 +195,7 @@ public final class TransactionTests {
                 null);
 
         Transaction signedTx = wallet.sign(unsignedTx);
-        utxoSet.add(wallet.getUtxos().get(0));
+        utxoSet.add(wallet.getUTxOs().get(0));
         assertThat(Transaction.isValid(signedTx, utxoSet)).isEqualTo(false);
 
         try {
