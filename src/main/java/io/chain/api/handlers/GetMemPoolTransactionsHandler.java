@@ -10,7 +10,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import lombok.RequiredArgsConstructor;
 
-import static io.chain.verticles.TransactionPoolManagerVerticle.UNCONFIRMED_TX_POOL;
+import static io.chain.p2p.handlers.UnconfirmedTransactionHandler.UNCONFIRMED_TX_POOL;
+
 
 @RequiredArgsConstructor
 public final class GetMemPoolTransactionsHandler extends AbstractRouteHandler implements Handler<RoutingContext> {
