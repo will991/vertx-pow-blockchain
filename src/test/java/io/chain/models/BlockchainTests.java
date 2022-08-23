@@ -28,7 +28,7 @@ public final class BlockchainTests {
     @Test
     @DisplayName("test add block to chain")
     public void testAddBlockToChain() {
-        blockchain.addBlock("test data");
+        blockchain.addBlock("test data".getBytes());
         assertEquals(2, blockchain.getBlocks().size());
         assertEquals(Block.genesisBlock().toString(), blockchain.getBlocks().get(0).toString());
         assertEquals(Block.genesisBlock().getHash(), blockchain.getBlocks().get(1).getPreviousBlockHash());
@@ -38,14 +38,14 @@ public final class BlockchainTests {
     @Test
     @DisplayName("test valid chain")
     void testValidChain() {
-        blockchain.addBlock("2nd block");
+        blockchain.addBlock("2nd block".getBytes());
         assertTrue(isValidChain(blockchain));
     }
 
     @Test
     @DisplayName("test corrupt genesis blockchain")
     void testInvalidGenesisChain() {
-        blockchain.addBlock("2nd block");
+        blockchain.addBlock("2nd block".getBytes());
         /* The design patterns prohibit any mutating actions for data structures like blocks and blockchain */
 //        blockchain.getChain().get(1).setPayload("hello".getBytes(StandardCharsets.UTF_8));
 //        assertFalse(isValidChain(blockchain));
@@ -55,7 +55,7 @@ public final class BlockchainTests {
     @DisplayName("test replacing valid blockchain")
     void testBlockchainReplace() {
         Blockchain b2 = new Blockchain();
-        b2.addBlock("2");
+        b2.addBlock("2".getBytes());
         blockchain.replace(b2);
         assertEquals(blockchain.getBlocks(), b2.getBlocks());
     }
@@ -63,7 +63,7 @@ public final class BlockchainTests {
     @Test
     @DisplayName("test no replacing by shorter blockchain")
     void testShorterBlockchainReplace() {
-        blockchain.addBlock("2");
+        blockchain.addBlock("2".getBytes());
         Blockchain b2 = new Blockchain();
         blockchain.replace(b2);
         assertEquals(2, blockchain.getBlocks().size());
@@ -74,9 +74,9 @@ public final class BlockchainTests {
     @Test
     @DisplayName("test no replacing by equal length blockchain")
     void testEqualLengthBlockchainReplace() {
-        blockchain.addBlock("2");
+        blockchain.addBlock("2".getBytes());
         Blockchain b2 = new Blockchain();
-        b2.addBlock("deux");
+        b2.addBlock("deux".getBytes());
         blockchain.replace(b2);
         assertEquals(2, blockchain.getBlocks().size());
         assertNotEquals(blockchain.getBlocks(), b2.getBlocks());
