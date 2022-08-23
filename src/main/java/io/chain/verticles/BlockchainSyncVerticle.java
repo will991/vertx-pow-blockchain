@@ -3,7 +3,6 @@ package io.chain.verticles;
 import io.chain.models.Blockchain;
 import io.chain.models.UTxOSet;
 import io.chain.p2p.handlers.BlockchainSyncHandler;
-import io.vertx.core.json.JsonArray;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -19,8 +18,6 @@ public final class BlockchainSyncVerticle extends AbstractEventBusVerticle {
 
     @Override
     public void start() {
-        register(NEW_BLOCKCHAIN, msg ->
-            new BlockchainSyncHandler(uuid, blockchain).handle(((JsonArray) msg.body()).toBuffer())
-        );
+        register(NEW_BLOCKCHAIN, new BlockchainSyncHandler(uuid, blockchain));
     }
 }
