@@ -41,14 +41,22 @@ public final class Input implements Comparable<Input> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Input input = (Input) o;
-        return index == input.index
-            && Arrays.equals(txHash, input.txHash);
+
+        /*
+         * NOTE: By excluding the signature of the equals method and hashcode, we ensure that
+         * the signed unconfirmed pool of transactions can still map inputs to UTxOs. Otherwise, the pool would not be
+         * able to distinguish between available/ spendable UTxOs and a signed version of those.
+         */
+        return index == input.index && Arrays.equals(txHash, input.txHash);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(index);
         result = 31 * result + Arrays.hashCode(txHash);
+        /*
+         * NOTE: Read note from equals method, why signature is excluded from hashcode.
+         */
         return result;
     }
 

@@ -101,6 +101,13 @@ public class Transaction implements Hashable, Shareable {
                                         .setInt(0, in.getIndex());
             for (int i = 0; i < inIdxBuffer.length(); i++)
                 rawTx.add(inIdxBuffer.getByte(i));
+
+            /*
+             * NOTE:
+             * By including input signatures we ensure that the signed unconfirmed pool of transactions
+             * will not replace multiple transactions to the same recipient with the same amount. This is intentional
+             * behavior.
+             */
             if (in.getSignature() != null) {
                 final byte[] base64Sig = in.getSignature().toBase64().getBytes();
                 for (int i = 0; i < base64Sig.length; i++)
