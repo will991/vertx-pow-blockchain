@@ -60,7 +60,7 @@ public class Block {
 
     public static Block genesisBlock() {
         final long start = new GregorianCalendar(1991,11,3).getTimeInMillis();
-        final byte[] data = "Will is building his own chain".getBytes(StandardCharsets.UTF_8);
+        final byte[] data = "Will is building his own chain".getBytes();
         return builder()
                 .timestamp(start)
                 .hash(hash(start, "WillWasStillUnborn", data, 0))
@@ -86,15 +86,13 @@ public class Block {
             hash = hash(minedAt, lastBlock.getHash(), data, nonce);
         } while ( ! hash.startsWith(DIFFICULTY_PREFIX));
 
-        Block newBlock = builder()
+        return builder()
                 .timestamp(minedAt)
                 .previousBlockHash(lastBlock.getHash())
                 .hash(hash)
                 .data(data)
                 .nonce(nonce)
                 .build();
-
-        return newBlock;
     }
 
     public static String hash(long timestamp, String previousBlockHash, byte[] data, int nonce) {
