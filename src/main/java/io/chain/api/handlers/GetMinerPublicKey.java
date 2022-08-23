@@ -19,6 +19,7 @@ public final class GetMinerPublicKey extends AbstractRouteHandler implements Han
             .end(
                 new JsonObject()
                     .put("pk", Hex.toHexString(wallet.getPk().toByteString().getBytes()))
+                    .put("balance", wallet.balance())
                     .encodePrettily()
             );
     }
