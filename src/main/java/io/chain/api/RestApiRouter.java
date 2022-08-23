@@ -2,6 +2,7 @@ package io.chain.api;
 
 import io.chain.api.handlers.*;
 import io.chain.models.Blockchain;
+import io.chain.models.UTxOSet;
 import io.chain.models.Wallet;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -12,7 +13,7 @@ import io.vertx.ext.web.impl.RouterImpl;
 
 public final class RestApiRouter extends RouterImpl {
 
-    public RestApiRouter(Vertx vertx, Blockchain blockchain, Wallet wallet) {
+    public RestApiRouter(Vertx vertx, Blockchain blockchain, Wallet wallet, UTxOSet utxos) {
         super(vertx);
 
         route()
@@ -31,7 +32,7 @@ public final class RestApiRouter extends RouterImpl {
 //        get("/transaction/:txHash")
         post("/transaction")
             .handler(BodyHandler.create())
-            .handler(new CreateTransactionHandler(vertx, wallet))
+            .handler(new CreateTransactionHandler(vertx, wallet, utxos))
             .handler(new GetMemPoolTransactionsHandler(vertx))
             .setName("Add a transaction");
 
