@@ -20,6 +20,10 @@ public final class RestApiRouter extends RouterImpl {
             .handler(LoggerHandler.create(LoggerFormat.SHORT))
             .handler(CorsHandler.create("*"));
 
+        get("/miner")
+            .handler(new GetMinerPublicKey(wallet))
+            .setName("Get miner public key");
+
         get("/blocks")
             .handler(new GetBlocksHandler(blockchain))
             .setName("Get Blocks");
