@@ -14,12 +14,16 @@ import static org.assertj.core.api.Assertions.fail;
 public final class WalletTests {
 
     private Wallet wallet;
+    private UTxOSet utxoSet = new UTxOSet();
 
     @BeforeEach
     void setup() throws Wallet.MismatchingUTxOAddressException {
         wallet = new Wallet();
         final UTxO utxo = new UTxO(new Input("123".getBytes(), 0), new Output(wallet.getPk(), 50));
         wallet.addUTxO(utxo);
+
+        final UTxO utxo2 = new UTxO(new Input("456".getBytes(), 0), new Output(wallet.getPk(), 100));
+        utxoSet.add(utxo2);
     }
 
     @Test
@@ -39,6 +43,20 @@ public final class WalletTests {
             fail("Expected MismatchingUTxOAddressException exception");
         } catch (Wallet.MismatchingUTxOAddressException e) {
             /* expected */
+        }
+    }
+
+    @Test
+    @DisplayName("test utxoSet wallet sync")
+    void testUTxOSetWalletSync() {
+        try {
+            assertThat(wallet.getUTxOs().size()).isEqualTo(1);
+            assertThat(wallet.balance()).isEqualTo(50);
+            utxoSet.sync(wallet);
+            assertThat(wallet.getUTxOs().size()).isEqualTo(1);
+            assertThat(wallet.balance()).isEqualTo(100);
+        } catch (Wallet.MismatchingUTxOAddressException e) {
+            fail("Expected no MismatchingUTxOAddressException exception");
         }
     }
 

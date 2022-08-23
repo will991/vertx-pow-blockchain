@@ -39,6 +39,10 @@ public final class UTxOSet {
         return contains(utxo.getTxIn());
     }
 
+    public void sync(Wallet wallet) throws Wallet.MismatchingUTxOAddressException {
+        wallet.setUTxOSet(filterBy(wallet.getPk()));
+    }
+
     public Set<UTxO> filterBy(PublicKey pk) {
         return getUtxos()
                 .values()
