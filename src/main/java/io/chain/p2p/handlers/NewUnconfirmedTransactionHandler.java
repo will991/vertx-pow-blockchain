@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import static java.lang.String.format;
 
 @RequiredArgsConstructor
-public final class UnconfirmedTransactionHandler implements Handler<Message<String>> {
+public final class NewUnconfirmedTransactionHandler implements Handler<Message<String>> {
     public static final String UNCONFIRMED_TX_POOL = "io.chain.unconfirmed.txs.pool";
 
     private final String uuid;

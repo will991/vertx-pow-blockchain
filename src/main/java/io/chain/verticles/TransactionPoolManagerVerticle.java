@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.chain.models.UTxO;
 import io.chain.models.UTxOSet;
-import io.chain.p2p.handlers.UnconfirmedTransactionHandler;
+import io.chain.p2p.handlers.NewUnconfirmedTransactionHandler;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -23,7 +23,7 @@ public final class TransactionPoolManagerVerticle extends AbstractEventBusVertic
 
     @Override
     public void start(Promise<Void> startPromise) {
-        register(NEW_TRANSACTION, new UnconfirmedTransactionHandler(uuid, utxos, vertx));
+        register(NEW_TRANSACTION, new NewUnconfirmedTransactionHandler(uuid, utxos, vertx));
 
         initUTxOSet()
             .onSuccess(startPromise::complete)

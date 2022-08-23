@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static io.chain.p2p.EventBusAddresses.NEW_TRANSACTION;
-import static io.chain.p2p.handlers.UnconfirmedTransactionHandler.UNCONFIRMED_TX_POOL;
+import static io.chain.p2p.handlers.NewUnconfirmedTransactionHandler.UNCONFIRMED_TX_POOL;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
