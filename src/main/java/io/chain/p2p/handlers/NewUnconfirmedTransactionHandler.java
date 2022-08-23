@@ -28,6 +28,7 @@ public final class NewUnconfirmedTransactionHandler implements Handler<Message<S
                 .<String, Transaction>getLocalMap(UNCONFIRMED_TX_POOL)
                 .put(tx.hash(), tx);
         } catch (TransactionValidationException e) {
+            e.printStackTrace(System.err);
             msg.reply(e.toJson(), new DeliveryOptions().setLocalOnly(true));
         }
     }

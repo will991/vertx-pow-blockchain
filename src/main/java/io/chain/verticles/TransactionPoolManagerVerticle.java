@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import static io.chain.p2p.EventBusAddresses.NEW_BLOCKCHAIN;
+import static io.chain.p2p.EventBusAddresses.NEW_BLOCK;
 import static io.chain.p2p.EventBusAddresses.NEW_TRANSACTION;
 
 @RequiredArgsConstructor
@@ -26,7 +26,7 @@ public final class TransactionPoolManagerVerticle extends AbstractEventBusVertic
     @Override
     public void start(Promise<Void> startPromise) {
         register(NEW_TRANSACTION, new NewUnconfirmedTransactionHandler(uuid, utxos, vertx));
-        register(NEW_BLOCKCHAIN, new NewBlockHandler(utxos, vertx));
+        register(NEW_BLOCK, new NewBlockHandler(utxos, vertx));
 
         initUTxOSet()
             .onSuccess(startPromise::complete)

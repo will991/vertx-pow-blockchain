@@ -17,6 +17,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static io.chain.p2p.handlers.NewUnconfirmedTransactionHandler.UNCONFIRMED_TX_POOL;
+
 @ExtendWith(VertxExtension.class)
 public abstract class AbstractVerticleTest {
 
@@ -38,6 +40,7 @@ public abstract class AbstractVerticleTest {
             result -> context.completeNow()
         );
         client = WebClient.create(vertx);
+        vertx.sharedData().getLocalMap(UNCONFIRMED_TX_POOL).clear();
     }
 
     @AfterEach
