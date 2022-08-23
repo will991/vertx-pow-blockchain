@@ -8,6 +8,7 @@ import io.chain.models.exceptions.InsufficientUTxOBalanceException;
 import io.vertx.core.buffer.Buffer;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -22,6 +23,7 @@ import static java.util.Collections.unmodifiableList;
 
 @ToString
 public final class Wallet {
+    public static final Wallet COINBASE = new Wallet();
 
     private final List<UTxO> utxos;
     @Getter(AccessLevel.PRIVATE)

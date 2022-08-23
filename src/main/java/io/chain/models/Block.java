@@ -15,6 +15,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Block {
 
+    public static final int MINING_REWARD = 100;
     private static final int DIFFICULTY = 4;
     private static String DIFFICULTY_PREFIX;
     {

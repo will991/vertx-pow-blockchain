@@ -15,6 +15,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Value
@@ -140,6 +141,13 @@ public class Transaction implements Hashable, Shareable {
     /*
      * Static
      */
+
+    public static Transaction rewardTransaction(Wallet minerWallet) {
+        return Wallet.COINBASE.sign(new Transaction(
+            Arrays.asList(new Input("COINBASE".getBytes(), 0)),
+            Arrays.asList(new Output(minerWallet.getPk(), Block.MINING_REWARD))
+        ));
+    }
 
     public static boolean isValid(Transaction tx, UTxOSet currentUtxoSet) {
         try {

@@ -6,6 +6,7 @@ import io.chain.models.exceptions.DoubleSpendException;
 import io.chain.models.exceptions.MissingSignatureException;
 import io.chain.models.exceptions.TransactionValidationException;
 import io.chain.models.exceptions.UnbalancedTransactionException;
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -206,5 +207,20 @@ public final class TransactionTests {
         } catch (TransactionValidationException e) {
             fail("No other validation exception expected", e);
         }
+    }
+
+    @Test
+    @DisplayName("test reward transaction")
+    void testRewardTransaction() {
+        final Transaction rewardTx = Transaction.rewardTransaction(wallet);
+        assertThat(rewardTx.getInputs().size()).isEqualTo(1);
+        assertThat(rewardTx.getInputs().get(0).getTxHash()).isEqualTo("COINBASE".getBytes());
+        assertThat(rewardTx.getOutputs().size()).isEqualTo(1);
+        assertThat(
+            Hex.toHexString(
+                rewardTx.getOutputs().get(0).getAddress().toByteString().getBytes()
+            )
+        ).isEqualTo(Hex.toHexString(wallet.getPk().toByteString().getBytes()));
+        assertThat(rewardTx.getOutputs().get(0).getAmount()).isEqualTo(Block.MINING_REWARD);
     }
 }
