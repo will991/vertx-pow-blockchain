@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +38,10 @@ public final class Blockchain {
      */
 
     public Block addBlock(List<Transaction> txs, byte[] data) {
-        final JsonObject blockData = new JsonObject().put("data", data);
+        final JsonObject blockData = new JsonObject();
+        if (data != null)
+            blockData.put("data", new String(data, StandardCharsets.UTF_8));
+
         final JsonArray bTxs = new JsonArray();
         txs.stream().map(Transaction::toJson).forEach(bTxs::add);
         blockData.put("txs", bTxs);

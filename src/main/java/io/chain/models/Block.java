@@ -1,12 +1,16 @@
 package io.chain.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import lombok.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.Objects;
+import java.util.*;
 
 @Getter
 @Builder
@@ -36,9 +40,6 @@ public class Block {
     byte[] data;
     int nonce;
 
-    /* TODO: Add transactions payload */
-    /* TODO: Add metadata payload */
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -52,6 +53,51 @@ public class Block {
         int result = Objects.hash(timestamp, hash, previousBlockHash, nonce);
         result = 31 * result + Arrays.hashCode(data);
         return result;
+    }
+
+    public JsonObject toJson() {
+        final JsonObject result = new JsonObject();
+        result.put("hash", Block.hash(this));
+        result.put("previousBlockHash", previousBlockHash);
+        result.put("timestamp", timestamp);
+        result.put("nonce", nonce);
+
+        final JsonArray txs = new JsonArray();
+        for (Transaction tx: getTransactions()) {
+            txs.add(tx.toJson());
+        }
+        result.put("transactions", txs);
+        result.put("data", getUTF_8Data());
+        return result;
+    }
+
+    @JsonIgnore
+    public List<Transaction> getTransactions() {
+        try {
+            final JsonObject blockData = Buffer.buffer(getData()).toJsonObject();
+            final List<Transaction> blockTxs = new ArrayList<>();
+
+            for (final Object raw: blockData.getJsonArray("txs", new JsonArray())) {
+                final JsonObject rawTx = (JsonObject) raw;
+                blockTxs.add(Json.decodeValue(rawTx.toBuffer(), Transaction.class));
+            }
+            return Collections.unmodifiableList(blockTxs);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    @JsonIgnore
+    public String getUTF_8Data() {
+        try {
+            final JsonObject blockData = Buffer.buffer(getData()).toJsonObject();
+            final Object data = blockData.getValue("data");
+            if (data != null)
+                return new String(data.toString().getBytes(), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            /* ignore */
+        }
+        return null;
     }
 
     /*

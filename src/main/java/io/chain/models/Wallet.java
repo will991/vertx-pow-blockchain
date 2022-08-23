@@ -65,7 +65,8 @@ public final class Wallet {
     }
 
     public void addUTxO(final UTxO utxo) throws MismatchingUTxOAddressException {
-        if ( ! utxo.getTxOut().getAddress().equals(pk)) {
+        final String hexPk = Hex.toHexString(pk.toByteString().getBytes());
+        if ( ! Hex.toHexString(utxo.getTxOut().getAddress().toByteString().getBytes()).equals(hexPk)) {
             throw new MismatchingUTxOAddressException(pk, utxo);
         }
 

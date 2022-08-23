@@ -1,6 +1,7 @@
 package io.chain.models;
 
 import com.starkbank.ellipticcurve.PublicKey;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.util.*;
 
@@ -44,11 +45,12 @@ public final class UTxOSet {
     }
 
     public Set<UTxO> filterBy(PublicKey pk) {
+        final String hexPk = Hex.toHexString(pk.toByteString().getBytes());
         return getUtxos()
                 .values()
                 .parallelStream()
                 .reduce(new HashSet<>(), (set, utxo) -> {
-                    if (utxo.getTxOut().getAddress().equals(pk)) {
+                    if (Hex.toHexString(utxo.getTxOut().getAddress().toByteString().getBytes()).equals(hexPk)) {
                         set.add(utxo);
                     }
                     return set;
