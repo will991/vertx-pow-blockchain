@@ -72,8 +72,4 @@ public final class CreateTransactionHandler extends AbstractRouteHandler impleme
                 .end(error(e.getMessage()));
         }
     }
-
-    private String error(String msg) {
-        return new JsonObject().put("error", msg).encodePrettily();
-    }
 }

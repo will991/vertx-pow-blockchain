@@ -3,6 +3,7 @@ package io.chain.api.handlers;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 import java.time.format.DateTimeFormatter;
@@ -30,4 +31,7 @@ abstract class AbstractRouteHandler {
                 ;
     }
 
+    protected final String error(String msg) {
+        return new JsonObject().put("error", msg).encodePrettily();
+    }
 }
