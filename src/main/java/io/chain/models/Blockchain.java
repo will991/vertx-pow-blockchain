@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +36,14 @@ public final class Blockchain {
      * Methods
      */
 
+    public Block addBlock(List<Transaction> txs, byte[] data) {
+        final JsonObject blockData = new JsonObject().put("data", data);
+        final JsonArray bTxs = new JsonArray();
+        txs.stream().map(Transaction::toJson).forEach(bTxs::add);
+        blockData.put("txs", bTxs);
+        return addBlock(blockData.encode().getBytes());
+    }
+
     public Block addBlock(byte[] data) {
         final Block newBlock = Block.mineBlock(blocks.get(blocks.size() - 1), data);
         blocks.add(newBlock);
@@ -50,10 +57,6 @@ public final class Blockchain {
         } catch (JsonProcessingException e) {
             return new JsonArray().add(new JsonObject().put("error", e.getMessage()));
         }
-    }
-
-    public Block addBlock(String data) {
-        return addBlock(data.getBytes(StandardCharsets.UTF_8));
     }
 
     public static boolean isValidChain(Blockchain chain) {
