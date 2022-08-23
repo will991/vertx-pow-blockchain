@@ -20,33 +20,37 @@ public final class RestApiRouter extends RouterImpl {
             .handler(LoggerHandler.create(LoggerFormat.SHORT))
             .handler(CorsHandler.create("*"));
 
-        get("/miner")
-            .handler(new GetMinerPublicKey(wallet))
-            .setName("Get miner public key");
-
+        /* BLOCK ENDPOINTS */
         get("/blocks")
             .handler(new GetBlocksHandler(blockchain))
             .setName("Get Blocks");
+        get("/blockCount")
+            .handler(new GetBlockCountHandler(blockchain))
+            .setName("Get block count");
+        get("/block/:blockHash")
+            .handler(new GetBlockDetailsHandler(blockchain))
+            .setName("Get block by hash");
 
-        get("/mempool")
-                .handler(new GetMemPoolTransactionsHandler(vertx))
-                .setName("Get MemPool Transactions");
-
-//        get("/block/:blockHash")
-//        get("/transaction/:txHash")
+        /* TX ENDPOINTS */
+        get("/transaction/:txHash")
+            .handler(new GetTransactionDetailsHandler(blockchain))
+            .setName("Get transaction by txHash");
         post("/transaction")
             .handler(BodyHandler.create())
             .handler(new CreateTransactionHandler(vertx, wallet, utxos))
             .handler(new GetMemPoolTransactionsHandler(vertx))
             .setName("Add a transaction");
+        get("/mempool")
+            .handler(new GetMemPoolTransactionsHandler(vertx))
+            .setName("Get MemPool Transactions");
 
-        get("/blockCount")
-            .handler(new GetBlockCountHandler(blockchain))
-            .setName("Get block count");
-
+        /* MINER ENDPOINTS */
+        get("/miner")
+            .handler(new GetMinerPublicKey(wallet))
+            .setName("Get miner public key");
         post("/mine")
             .handler(BodyHandler.create())
-            .handler(new MineBlockHandler(blockchain, vertx))
+            .handler(new MineBlockHandler(blockchain, utxos, wallet, vertx))
             .handler(new GetBlocksHandler(blockchain))
             .setName("Mine a new block");
     }
