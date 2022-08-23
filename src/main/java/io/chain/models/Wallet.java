@@ -8,11 +8,9 @@ import io.chain.models.exceptions.InsufficientUTxOBalanceException;
 import io.vertx.core.buffer.Buffer;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 import org.bouncycastle.util.encoders.Hex;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -55,6 +53,13 @@ public final class Wallet {
         this.utxos = utxos;
     }
 
+    public void setUTxOSet(Set<UTxO> newUTxOSet) throws MismatchingUTxOAddressException {
+        utxos.clear();
+        for (UTxO utxo : newUTxOSet) {
+            addUTxO(utxo);
+        }
+    }
+
     public List<UTxO> getUTxOs() {
         return unmodifiableList(utxos);
     }
@@ -83,7 +88,7 @@ public final class Wallet {
 
     public Transaction sign(Transaction tx) {
         for (int i = 0; i < tx.getInputs().size(); i++) {
-            final String signableData = Buffer.buffer(tx.getRawDataToSign(i)).toString(StandardCharsets.UTF_8);
+            final String signableData = Buffer.buffer(tx.getRawDataToSign(i)).toString();
             final Signature signature = Ecdsa.sign(signableData, sk);
             tx.getInputs().get(i).addSignature(signature);
         }
