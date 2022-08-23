@@ -10,8 +10,6 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.Json;
 import lombok.RequiredArgsConstructor;
 
-import static java.lang.String.format;
-
 @RequiredArgsConstructor
 public final class NewUnconfirmedTransactionHandler implements Handler<Message<String>> {
     public static final String UNCONFIRMED_TX_POOL = "io.chain.unconfirmed.txs.pool";
@@ -23,8 +21,6 @@ public final class NewUnconfirmedTransactionHandler implements Handler<Message<S
     @Override
     public void handle(Message<String> msg) {
         final Transaction tx = Json.decodeValue(msg.body(), Transaction.class);
-
-        System.out.println(format("[%s] MemPool received Tx: %s", uuid, tx.hash()));
         try {
             Transaction.validate(tx, utxos);
             vertx
