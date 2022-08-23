@@ -44,6 +44,7 @@ public class Transaction implements Hashable, Shareable {
         final JsonObject result = new JsonObject();
 
         try {
+            result.put("txHash", hash());
             result.put("inputs", Buffer.buffer(mapper.writeValueAsString(inputs)).toJsonArray());
             result.put("outputs", Buffer.buffer(mapper.writeValueAsString(outputs)).toJsonArray());
             if (data != null) {
