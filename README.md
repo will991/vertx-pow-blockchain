@@ -30,6 +30,7 @@ There are a few available configurations which can be found in
     "host": "localhost",
     "port": 8080
   },
+  "isMiner": true,
   "initialUTxOs": []
 }
 ```
@@ -56,10 +57,15 @@ Then, you can run the following command in the root directory of the project:
 mvn clean test
 ```
 
+## Chain Properties vs predefined Requirements
+
+
 ## Improvements
 - sync single block instead of entire blockchain
 - addition of transaction fees for miners
 - dynamic difficulty adjustment
 - decreasing miner reward
+- add block data as plain byte[] instead of json to decrease size
+  - requires custom byte-wise deserialization logic
 - add sync mechanism for range of blocks based on height difference
 - use websockets instead of VertX event bus for sync of blocks and txs
