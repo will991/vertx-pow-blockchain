@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -214,7 +215,7 @@ public final class TransactionTests {
     void testRewardTransaction() {
         final Transaction rewardTx = Transaction.rewardTransaction(wallet);
         assertThat(rewardTx.getInputs().size()).isEqualTo(1);
-        assertThat(rewardTx.getInputs().get(0).getTxHash()).isEqualTo("COINBASE".getBytes());
+        assertThat(rewardTx.getInputs().get(0).getTxHash()).isEqualTo("COINBASE".getBytes(StandardCharsets.UTF_8));
         assertThat(rewardTx.getOutputs().size()).isEqualTo(1);
         assertThat(
             Hex.toHexString(
@@ -222,5 +223,12 @@ public final class TransactionTests {
             )
         ).isEqualTo(Hex.toHexString(wallet.getPk().toByteString().getBytes()));
         assertThat(rewardTx.getOutputs().get(0).getAmount()).isEqualTo(Block.MINING_REWARD);
+        assertThat(rewardTx.isValidRewardTx()).isEqualTo(true);
+
+        try {
+            Transaction.validate(rewardTx, new UTxOSet());
+        } catch (TransactionValidationException e) {
+            fail("No exception expected", e);
+        }
     }
 }

@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.chain.models.Wallet.COINBASE;
+
 @Value
 @ToString
 @JsonDeserialize(using = TransactionDeserializer.class)
@@ -52,6 +54,18 @@ public class Transaction implements Hashable, Shareable {
         }
 
         return result;
+    }
+
+    public boolean isValidRewardTx() {
+        if (getInputs().size() != 1) return false;
+        if ( ! new String(getInputs().get(0).getTxHash(), StandardCharsets.UTF_8).equals("COINBASE")) return false;
+        if (getInputs().get(0).getIndex() != 0) return false;
+        final String verifiableData = Buffer.buffer(getRawDataToSign(0)).toString();
+        if ( ! Ecdsa.verify(verifiableData, getInputs().get(0).getSignature(), COINBASE.getPk())) return false;
+
+        if (getOutputs().size() != 1) return false;
+        if (getOutputs().get(0).getAmount() != Block.MINING_REWARD) return false;
+        return true;
     }
 
     @Override
@@ -143,8 +157,8 @@ public class Transaction implements Hashable, Shareable {
      */
 
     public static Transaction rewardTransaction(Wallet minerWallet) {
-        return Wallet.COINBASE.sign(new Transaction(
-            Arrays.asList(new Input("COINBASE".getBytes(), 0)),
+        return COINBASE.sign(new Transaction(
+            Arrays.asList(new Input("COINBASE".getBytes(StandardCharsets.UTF_8), 0)),
             Arrays.asList(new Output(minerWallet.getPk(), Block.MINING_REWARD))
         ));
     }
@@ -165,16 +179,24 @@ public class Transaction implements Hashable, Shareable {
 
         for (int i = 0; i < tx.getInputs().size(); i++) {
             final Input input = tx.getInputs().get(i);
-            if ( ! currentUtxoSet.contains(input)) // prevent double spending
-                throw new DoubleSpendException(input, tx);
-            final UTxO utxo = currentUtxoSet.get(input);
-            final String verifiableData = Buffer.buffer(tx.getRawDataToSign(i)).toString(StandardCharsets.UTF_8);
-            if (input.getSignature() == null)
-                throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
-            if ( ! Ecdsa.verify(verifiableData, input.getSignature(), utxo.getTxOut().getAddress()))
-                throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
+
+            final UTxO utxo;
+            if (tx.isValidRewardTx()) {
+                utxo = new UTxO(new Input(tx.hash().getBytes(), 0), tx.getOutputs().get(0));
+            } else {
+                if ( ! currentUtxoSet.contains(input)) // prevent double spending
+                    throw new DoubleSpendException(input, tx);
+                utxo = currentUtxoSet.get(input);
+                final String verifiableData = Buffer.buffer(tx.getRawDataToSign(i)).toString();
+                if (input.getSignature() == null)
+                    throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
+                if ( ! Ecdsa.verify(verifiableData, input.getSignature(), utxo.getTxOut().getAddress()))
+                    throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
+            }
+
             if (newUtxoSet.contains(input))
                 throw new DoubleSpendException(input, tx); // utxo consumed multiple times in same tx
+
             newUtxoSet.add(utxo);
             inSum += utxo.getTxOut().getAmount();
         }
