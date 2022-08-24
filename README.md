@@ -1,5 +1,34 @@
 # PoW Will-Chain
 
+## REST API
+
+`GET /blocks` Returns list of all blocks in blockchain.
+
+`GET /blockCount` Returns height of blockchain.
+
+`GET/block/:blockHash` Returns the respective block or error.
+
+`GET /transaction/:txHash` Returns the respective transaction or error.
+
+`POST /transaction` Creates a new transaction that spends a given amount from the miner wallet to
+a specified recipient if the balance is sufficient. The POST request payload should look something like this:
+```
+{
+    "amount": <number>,
+    "recipient": "<hex public key>",
+    "data": <arbitrary data>         // optional 
+}
+```
+This endpoint redirects to the Tx mem pool if successful.
+
+`GET /mempool` Returns the list of signed, unconfirmed transactions.
+
+`GET /miner` Returns miner information like public key and current balance.
+
+`POST /mine` Mines a new block and redirects to `/blocks` endpoint.
+
+`GET /utxos` Returns the global UTxO set of the blockchain that is spendable.
+
 ## Building & Dependencies
 For development the [jenv](https://github.com/jenv/jenv) repo was used to selectively manage Java versions on a per project level.
 - Apache Maven 3.8.1
@@ -65,6 +94,7 @@ mvn clean test
 - addition of transaction fees for miners
 - dynamic difficulty adjustment
 - decreasing miner reward
+- persist blockchain in Postgres instead of in-memory
 - add block data as plain byte[] instead of json to decrease size
   - requires custom byte-wise deserialization logic
 - add sync mechanism for range of blocks based on height difference
