@@ -76,6 +76,9 @@ discovery requests.
 
 ```
 ./scripts/run.sh <port | default 8080>
+
+Launched new instance: cf5aa97d-9026-4134-9f03-d7f84a2cab7b
+Listening on: http://localhost:<port | 8080>
 ``` 
 
 ## Testing
