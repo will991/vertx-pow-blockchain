@@ -81,6 +81,51 @@ Launched new instance: cf5aa97d-9026-4134-9f03-d7f84a2cab7b
 Listening on: http://localhost:<port | 8080>
 ``` 
 
+### Examples Actions
+
+#### 1. See miner details
+Before any mutating actions, you can inspect the miner's public key and current wallet balance
+by running the following command:
+```
+curl -X GET -H 'Content-Type: application/json' "http://localhost:8080/miner" | jq .
+```
+
+#### 2. Mining blocks
+Mine a new block with a particular node (defined by port) with custom metadata:
+```
+curl -X POST -H 'Content-Type: application/json' -d 'Block 1' "http://localhost:8080/mine" | jq .
+```
+Copy the <code>hash</code> value of the newly minted block to view the block details including the provided metadata run:
+```
+curl -X GET -H 'Content-Type: application/json' "http://localhost:8080/block/<hash>" | jq .
+```
+With the block details you can also inspect further transaction details by copying any of the block's 
+transaction hashes <code>txHash</code> and run the following command:
+```
+curl -X GET -H 'Content-Type: application/json' "http://localhost:8080/transaction/<txHash>" | jq .
+```
+Every block will have at least one transaction - the reward transaction for the miner. Hence, once
+you created a block you essentially created a new spendable output for the miner's wallet.
+The entire blockchain UTxO set can be inspected using the following command:
+```
+curl -X GET -H 'Content-Type: application/json' "http://localhost:8080/utxos" | jq .
+```
+This should show the credited mining reward to the miner's wallet.
+
+#### 3. Create new transaction
+In order to create a new transaction that will live in the signed, unconfirmed Tx Mem Pool until the next block is mined, 
+you can use the following command. This endpoint will spend from the node's wallet (miner wallet), so you will have to mine a block
+first to have spendable outputs, otherwise you will get an error.
+
+Use a public key of a second miner node as recipient and an amount of your choice to create a new transaction. 
+Optionally, you may add metadata to the transaction like shown below:
+
+```
+curl -X POST \
+-H 'Content-Type: application/json' \
+-d '{"recipient": "b99cda4fa196d68eb82bad6fc3ae39133f74a979164a8226b0e16624f331f51454a469e7759fb02f59a9e08311540d241243eb313eecde2876d4e7532930f84f", "amount": 10, "data": "test tx data"}' "http://localhost:8080/transaction" | jq .
+```
+
 ## Testing
 This requires maven to be installed on your machine. During development, **Apache Maven 3.8.1** was used. 
 Then, you can run the following command in the root directory of the project:
@@ -88,9 +133,6 @@ Then, you can run the following command in the root directory of the project:
 ```
 mvn clean test
 ```
-
-## Chain Properties vs predefined Requirements
-
 
 ## Improvements
 - sync single block instead of entire blockchain
