@@ -34,7 +34,7 @@ public class MainVerticle extends AbstractVerticle {
 
         deploy(new RestApiVerticle(blockchain, minerWallet, utxos), new DeploymentOptions().setConfig(config()))
             .compose(r -> deploy(new BlockchainSyncVerticle(blockchain, utxos, uuid), new DeploymentOptions()))
-            .compose(r -> deploy(new TransactionPoolManagerVerticle(uuid, utxos, minerWallet), new DeploymentOptions().setConfig(config())))
+            .compose(r -> deploy(new TransactionPoolManagerVerticle(uuid, blockchain, utxos, minerWallet), new DeploymentOptions().setConfig(config())))
             .onSuccess(startPromise::complete)
             .onFailure(startPromise::fail);
     }
