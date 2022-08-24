@@ -32,7 +32,6 @@ public final class BlockchainSyncHandler implements Handler<Message<JsonArray>> 
     @Override
     public void handle(Message<JsonArray> msg) {
         final ObjectMapper mapper = new ObjectMapper();
-        System.out.printf("[%s] Got new blockchain%n", uuid);
         try {
             List<Block> blocks = mapper.readValue(msg.body().encode(), new TypeReference<>(){});
             Blockchain newBlockchain = new Blockchain(blocks);

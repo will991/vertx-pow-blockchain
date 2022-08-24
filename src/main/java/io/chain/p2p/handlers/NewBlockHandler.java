@@ -29,7 +29,6 @@ public final class NewBlockHandler implements Handler<Message<String>> {
             final List<Transaction> blockTxs = lastBlock.getTransactions();
             final List<Transaction> processedTxs = utxoSet.process(blockTxs);
             vertx.sharedData().getLocalMap(UNCONFIRMED_TX_POOL).clear();
-            System.out.println("Processed: " + processedTxs.size());
             vertx.eventBus().send(
                 SYNC_WALLET.getAddress(),
                 "",
