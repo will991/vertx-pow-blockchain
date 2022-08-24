@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import static io.chain.p2p.EventBusAddresses.NEW_BLOCK;
-import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 
 @Getter
@@ -33,13 +32,13 @@ public final class BlockchainSyncHandler implements Handler<Message<JsonArray>> 
     @Override
     public void handle(Message<JsonArray> msg) {
         final ObjectMapper mapper = new ObjectMapper();
-        System.out.println(format("[%s] Got new blockchain", uuid));
+        System.out.printf("[%s] Got new blockchain%n", uuid);
         try {
             List<Block> blocks = mapper.readValue(msg.body().encode(), new TypeReference<>(){});
             Blockchain newBlockchain = new Blockchain(blocks);
 
             if (blockchain.replace(newBlockchain)) { // this only is true for remote nodes - not local one which mined the block
-                System.out.println(format("[%s] Replacing chain with new one:%s%s", uuid, lineSeparator(), newBlockchain.toJson().encodePrettily()));
+                System.out.printf("[%s] Replacing chain with new one:%s%s%n", uuid, lineSeparator(), newBlockchain.toJson().encodePrettily());
             }
 
             /* NOTE: Trigger UTxOSet update */
