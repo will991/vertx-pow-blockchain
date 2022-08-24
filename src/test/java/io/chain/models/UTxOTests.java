@@ -42,7 +42,7 @@ public final class UTxOTests {
         final JsonObject jsonUtxo = new JsonObject(Json.encodePrettily(utxo));
         final JsonObject input = jsonUtxo.getJsonObject("txIn");
         final JsonObject output = jsonUtxo.getJsonObject("txOut");
-        assertThat(new String(Hex.decode(input.getString("txHash")), StandardCharsets.UTF_8)).isEqualTo("COINBASE");
+        assertThat(input.getString("txHash")).isEqualTo(Hex.toHexString("COINBASE".getBytes()));
         assertThat(input.getInteger("index")).isEqualTo(0);
         assertThat(input.getValue("signature")).isNull();
         assertThat(output.getString("address")).isEqualTo(Hex.toHexString(wallet.getPk().toByteString().getBytes()));

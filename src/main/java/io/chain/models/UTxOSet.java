@@ -63,7 +63,6 @@ public final class UTxOSet {
 
     public List<Transaction> process(List<Transaction> txs) {
         final Set<Transaction> processed = new HashSet<>();
-
         for (final Transaction tx: txs) {
             if (Transaction.isValid(tx, this)) {
                 for (Input input: tx.getInputs())
