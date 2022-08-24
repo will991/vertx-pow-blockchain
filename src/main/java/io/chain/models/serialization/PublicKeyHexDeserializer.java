@@ -1,6 +1,5 @@
 package io.chain.models.serialization;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -19,7 +18,7 @@ public class PublicKeyHexDeserializer extends StdDeserializer<PublicKey> {
     }
 
     @Override
-    public PublicKey deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+    public PublicKey deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         return PublicKey.fromString(new ByteString(Hex.decode(jsonParser.getText())));
     }
 }
