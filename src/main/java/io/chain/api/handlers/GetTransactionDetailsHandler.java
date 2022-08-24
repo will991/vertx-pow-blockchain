@@ -16,7 +16,6 @@ public final class GetTransactionDetailsHandler extends AbstractRouteHandler imp
     @Override
     public void handle(RoutingContext routingContext) {
         final String txHash = routingContext.request().getParam("txHash");
-        System.out.println("Looking up: " + txHash);
         for (Block block: blockchain.getBlocks()) {
             for (Transaction tx: block.getTransactions()) {
                 if (tx.hash().equals(txHash)) {

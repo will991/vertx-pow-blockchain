@@ -15,7 +15,6 @@ public final class GetBlockDetailsHandler extends AbstractRouteHandler implement
     @Override
     public void handle(RoutingContext routingContext) {
         final String blockHash = routingContext.request().getParam("blockHash");
-        System.out.println("Looking up block hash : " + blockHash);
         for (Block block: blockchain.getBlocks()) {
             if (block.getHash().equals(blockHash)) {
                 addResponseHeaders(HttpResponseStatus.OK, routingContext)
