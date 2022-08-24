@@ -17,6 +17,9 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 
+/**
+ * Serves as entry point to launch all required verticles to perform blockchain work.
+ */
 public class MainVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
 

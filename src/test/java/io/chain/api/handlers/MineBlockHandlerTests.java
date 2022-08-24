@@ -33,7 +33,7 @@ public final class MineBlockHandlerTests extends AbstractApiTest {
                 assertThat(blocks.get(1).getPreviousBlockHash())
                     .isEqualTo(genesisBlock().getHash());
 
-                vertx.setTimer(3000L, t ->
+                vertx.setTimer(5000L, t ->
                     get("/miner")
                         .as(BodyCodec.buffer())
                         .send(testContext.succeeding(getResponse -> testContext.verify(() -> {

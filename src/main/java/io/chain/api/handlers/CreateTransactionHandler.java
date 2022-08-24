@@ -56,7 +56,7 @@ public final class CreateTransactionHandler extends AbstractRouteHandler impleme
                     Transaction.validate(signedTx, utxos);
                     vertx
                         .eventBus()
-                        .publish(NEW_TRANSACTION.getAddress(), signedTx.toJson().encode());
+                        .publish(NEW_TRANSACTION.getAddress(), signedTx.toJson());
 
                     vertx.setTimer(300L, t -> routingContext.next());
                 } catch (TransactionValidationException e) {

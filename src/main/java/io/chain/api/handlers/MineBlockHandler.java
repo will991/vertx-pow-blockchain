@@ -22,7 +22,7 @@ public final class MineBlockHandler extends AbstractRouteHandler implements Hand
 
     @Override
     public void handle(RoutingContext context) {
-        final byte[] blockData = context.body() == null ? null : context.body().buffer().getBytes();
+        final byte[] blockData = context.body().buffer() == null ? null : context.body().buffer().getBytes();
 
         vertx
             .deployVerticle(new MinerVerticle(blockchain, utxos, minerWallet, blockData), new DeploymentOptions())
