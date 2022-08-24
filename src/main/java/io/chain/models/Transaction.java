@@ -1,5 +1,6 @@
 package io.chain.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -12,10 +13,10 @@ import io.vertx.core.shareddata.Shareable;
 import lombok.ToString;
 import lombok.Value;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static io.chain.models.Wallet.COINBASE;
@@ -25,8 +26,8 @@ import static io.chain.models.Wallet.COINBASE;
 @JsonDeserialize(using = TransactionDeserializer.class)
 public class Transaction implements Hashable, Shareable {
 
-    private final List<Input> inputs;
-    private final List<Output> outputs;
+    List<Input> inputs;
+    List<Output> outputs;
     byte[] data;
 
     public Transaction(List<Input> inputs, List<Output> outputs) {
@@ -57,6 +58,7 @@ public class Transaction implements Hashable, Shareable {
         return result;
     }
 
+    @JsonIgnore
     public boolean isValidRewardTx() {
         if (getInputs().size() != 1) return false;
         if ( ! new String(getInputs().get(0).getTxHash(), StandardCharsets.UTF_8).equals("COINBASE")) return false;
@@ -65,8 +67,7 @@ public class Transaction implements Hashable, Shareable {
         if ( ! Ecdsa.verify(verifiableData, getInputs().get(0).getSignature(), COINBASE.getPk())) return false;
 
         if (getOutputs().size() != 1) return false;
-        if (getOutputs().get(0).getAmount() != Block.MINING_REWARD) return false;
-        return true;
+        return getOutputs().get(0).getAmount() != Block.MINING_REWARD;
     }
 
     @Override
@@ -96,8 +97,7 @@ public class Transaction implements Hashable, Shareable {
                 signData.add(amountBuffer.getByte(i));
 
             final byte[] address = out.getAddress().toByteString().getBytes();
-            for (int i = 0; i < address.length; i++)
-                signData.add(address[i]);
+            for (byte b : address) signData.add(b);
         }
         byte[] result = new byte[signData.size()];
         for (int i = 0; i < signData.size(); i++)
@@ -126,8 +126,7 @@ public class Transaction implements Hashable, Shareable {
              */
             if (in.getSignature() != null) {
                 final byte[] base64Sig = in.getSignature().toBase64().getBytes();
-                for (int i = 0; i < base64Sig.length; i++)
-                    rawTx.add(base64Sig[i]);
+                for (byte b : base64Sig) rawTx.add(b);
             }
         }
 
@@ -139,13 +138,11 @@ public class Transaction implements Hashable, Shareable {
                 rawTx.add(amountBuffer.getByte(i));
 
             final byte[] outAddress = out.getAddress().toByteString().getBytes();
-            for (int i = 0; i < outAddress.length; i++)
-                rawTx.add(outAddress[i]);
+            for (byte address : outAddress) rawTx.add(address);
         }
 
         if (data != null)
-            for (int i = 0; i < data.length; i++)
-                rawTx.add(data[i]);
+            for (byte datum : data) rawTx.add(datum);
 
         byte[] result = new byte[rawTx.size()];
         for (int i = 0; i < rawTx.size(); i++)
@@ -158,9 +155,10 @@ public class Transaction implements Hashable, Shareable {
      */
 
     public static Transaction rewardTransaction(Wallet minerWallet) {
+        System.out.println("COINBASE PK: " + Hex.toHexString(COINBASE.getPk().toByteString().getBytes()));
         return COINBASE.sign(new Transaction(
-            Arrays.asList(new Input("COINBASE".getBytes(StandardCharsets.UTF_8), 0)),
-            Arrays.asList(new Output(minerWallet.getPk(), Block.MINING_REWARD))
+            List.of(new Input("COINBASE".getBytes(StandardCharsets.UTF_8), 0)),
+            List.of(new Output(minerWallet.getPk(), Block.MINING_REWARD))
         ));
     }
 
@@ -188,9 +186,9 @@ public class Transaction implements Hashable, Shareable {
                 if ( ! currentUtxoSet.contains(input)) // prevent double spending
                     throw new DoubleSpendException(input, tx);
                 utxo = currentUtxoSet.get(input);
-                final String verifiableData = Buffer.buffer(tx.getRawDataToSign(i)).toString();
                 if (input.getSignature() == null)
                     throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
+                final String verifiableData = Buffer.buffer(tx.getRawDataToSign(i)).toString();
                 if ( ! Ecdsa.verify(verifiableData, input.getSignature(), utxo.getTxOut().getAddress()))
                     throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
             }
