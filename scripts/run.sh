@@ -1,12 +1,5 @@
 #!/bin/bash
 
-################################## Helper ##################################
-
-exit_with_error() {
-    printf "'%s' failed with exit code %d in function '%s' at line %d.\n" "${1-something}" "$?" "${FUNCNAME[1]}" "${BASH_LINENO[0]}"
-    exit 1
-}
-
 ################################## RUN ##################################
 
 CONFIG='./src/main/resources/config.json'
