@@ -14,6 +14,7 @@ import io.chain.models.Transaction;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
         final ArrayNode inputs = (ArrayNode) node.get("inputs");
         for (int i = 0; i < inputs.size(); i++) {
             final JsonNode n = inputs.get(i);
-            final byte[] txHash = Hex.decode(n.get("txHash").textValue());
+            final byte[] txHash = new String(Hex.decode(n.get("txHash").textValue()), StandardCharsets.UTF_8).getBytes();
             final int txIdx = (int) n.get("index").numberValue();
             final Signature sig = Signature.fromBase64(new ByteString(n.get("signature").textValue().getBytes()));
             ins.add(new Input(txHash, txIdx, sig));

@@ -3,6 +3,7 @@ package io.chain.verticles;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.chain.models.Blockchain;
 import io.chain.models.UTxO;
 import io.chain.models.UTxOSet;
 import io.chain.models.Wallet;
@@ -22,13 +23,14 @@ import static io.chain.p2p.EventBusAddresses.*;
 public final class TransactionPoolManagerVerticle extends AbstractEventBusVerticle {
 
     private final String uuid;
+    private final Blockchain blockchain;
     private final UTxOSet utxos;
     private final Wallet minerWallet;
 
     @Override
     public void start(Promise<Void> startPromise) {
         register(NEW_TRANSACTION, new NewUnconfirmedTransactionHandler(uuid, utxos, vertx));
-        registerLocally(NEW_BLOCK, new NewBlockHandler(utxos, vertx));
+        registerLocally(NEW_BLOCK, new NewBlockHandler(blockchain, utxos, vertx));
         registerLocally(SYNC_WALLET, new SyncWalletHandler(minerWallet, utxos));
 
         initUTxOSet()

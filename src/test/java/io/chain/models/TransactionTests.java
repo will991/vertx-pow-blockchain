@@ -6,6 +6,8 @@ import io.chain.models.exceptions.DoubleSpendException;
 import io.chain.models.exceptions.MissingSignatureException;
 import io.chain.models.exceptions.TransactionValidationException;
 import io.chain.models.exceptions.UnbalancedTransactionException;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Collections.singletonList;
@@ -230,5 +233,22 @@ public final class TransactionTests {
         } catch (TransactionValidationException e) {
             fail("No exception expected", e);
         }
+    }
+
+    @Test
+    void testSerialization() {
+        final Wallet wallet = new Wallet();
+        final Transaction tx = new Transaction(
+            List.of(new Input("123".getBytes(), 0)),
+            List.of(new Output(wallet.getPk(), 50))
+        );
+        final Transaction signedTx = wallet.sign(tx);
+        final JsonObject encodedTx = signedTx.toJson();
+        final Transaction decodedTx = Json.decodeValue(encodedTx.toBuffer(), Transaction.class);
+
+        assertThat(decodedTx.getInputs().get(0).getTxHash()).isEqualTo(signedTx.getInputs().get(0).getTxHash());
+        assertThat(new String(signedTx.getInputs().get(0).getTxHash(), StandardCharsets.UTF_8)).isEqualTo(
+            new String(decodedTx.getInputs().get(0).getTxHash(), StandardCharsets.UTF_8)
+        );
     }
 }

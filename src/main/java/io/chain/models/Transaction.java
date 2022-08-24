@@ -9,7 +9,6 @@ import io.chain.models.exceptions.*;
 import io.chain.models.serialization.TransactionDeserializer;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.Shareable;
 import lombok.ToString;
 import lombok.Value;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -23,7 +22,7 @@ import static io.chain.models.Wallet.COINBASE;
 @Value
 @ToString
 @JsonDeserialize(using = TransactionDeserializer.class)
-public class Transaction implements Hashable, Shareable {
+public class Transaction implements Hashable {
 
     List<Input> inputs;
     List<Output> outputs;
@@ -48,7 +47,7 @@ public class Transaction implements Hashable, Shareable {
             result.put("inputs", Buffer.buffer(mapper.writeValueAsString(inputs)).toJsonArray());
             result.put("outputs", Buffer.buffer(mapper.writeValueAsString(outputs)).toJsonArray());
             if (data != null) {
-                result.put("data", Buffer.buffer(mapper.writeValueAsString(data)).toString());
+                result.put("data", new String(data.toString().getBytes(), StandardCharsets.UTF_8));
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -183,6 +182,7 @@ public class Transaction implements Hashable, Shareable {
             } else {
                 if ( ! currentUtxoSet.contains(input)) // prevent double spending
                     throw new DoubleSpendException(input, tx);
+
                 utxo = currentUtxoSet.get(input);
                 if (input.getSignature() == null)
                     throw new MissingSignatureException(utxo.getTxOut().getAddress(), tx);
