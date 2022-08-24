@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum EventBusAddresses {
     NEW_BLOCKCHAIN("blockchain.new"),
     NEW_BLOCK("block.new"),
+    SYNC_WALLET("wallet.sync"),
     NEW_TRANSACTION("transaction.new");
 
     private final String address;

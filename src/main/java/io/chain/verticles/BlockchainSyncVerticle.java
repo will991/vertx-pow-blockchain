@@ -18,6 +18,6 @@ public final class BlockchainSyncVerticle extends AbstractEventBusVerticle {
 
     @Override
     public void start() {
-        register(NEW_BLOCKCHAIN, new BlockchainSyncHandler(uuid, blockchain));
+        register(NEW_BLOCKCHAIN, new BlockchainSyncHandler(uuid, blockchain, vertx));
     }
 }

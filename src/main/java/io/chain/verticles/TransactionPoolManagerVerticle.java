@@ -5,8 +5,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.chain.models.UTxO;
 import io.chain.models.UTxOSet;
+import io.chain.models.Wallet;
 import io.chain.p2p.handlers.NewBlockHandler;
 import io.chain.p2p.handlers.NewUnconfirmedTransactionHandler;
+import io.chain.p2p.handlers.SyncWalletHandler;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -14,19 +16,20 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import static io.chain.p2p.EventBusAddresses.NEW_BLOCK;
-import static io.chain.p2p.EventBusAddresses.NEW_TRANSACTION;
+import static io.chain.p2p.EventBusAddresses.*;
 
 @RequiredArgsConstructor
 public final class TransactionPoolManagerVerticle extends AbstractEventBusVerticle {
 
-    private final UTxOSet utxos;
     private final String uuid;
+    private final UTxOSet utxos;
+    private final Wallet minerWallet;
 
     @Override
     public void start(Promise<Void> startPromise) {
         register(NEW_TRANSACTION, new NewUnconfirmedTransactionHandler(uuid, utxos, vertx));
-        register(NEW_BLOCK, new NewBlockHandler(utxos, vertx));
+        registerLocally(NEW_BLOCK, new NewBlockHandler(utxos, vertx));
+        registerLocally(SYNC_WALLET, new SyncWalletHandler(minerWallet, utxos));
 
         initUTxOSet()
             .onSuccess(startPromise::complete)

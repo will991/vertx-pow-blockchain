@@ -33,13 +33,15 @@ public final class MineBlockHandlerTests extends AbstractApiTest {
                 assertThat(blocks.get(1).getPreviousBlockHash())
                     .isEqualTo(genesisBlock().getHash());
 
-                get("/miner")
-                    .as(BodyCodec.buffer())
-                    .send(testContext.succeeding(getResponse -> testContext.verify(() -> {
-                        final JsonObject minerInfo = getResponse.bodyAsJsonObject();
-                        assertThat(minerInfo.getInteger("balance")).isEqualTo(100);
-                        testContext.completeNow();
-                    })));
+                vertx.setTimer(3000L, t ->
+                    get("/miner")
+                        .as(BodyCodec.buffer())
+                        .send(testContext.succeeding(getResponse -> testContext.verify(() -> {
+                            final JsonObject minerInfo = getResponse.bodyAsJsonObject();
+                            assertThat(minerInfo.getInteger("balance")).isEqualTo(100);
+                            testContext.completeNow();
+                        })))
+                );
             })));
     }
 }

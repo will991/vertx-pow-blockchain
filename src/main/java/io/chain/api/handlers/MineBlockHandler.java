@@ -1,6 +1,5 @@
 package io.chain.api.handlers;
 
-import io.chain.models.Block;
 import io.chain.models.Blockchain;
 import io.chain.models.UTxOSet;
 import io.chain.models.Wallet;
@@ -26,14 +25,8 @@ public final class MineBlockHandler extends AbstractRouteHandler implements Hand
         final byte[] blockData = context.body() == null ? null : context.body().buffer().getBytes();
 
         vertx
-            .deployVerticle(new MinerVerticle(blockchain, utxos, minerWallet, blockData, vertx), new DeploymentOptions())
-            .onSuccess(s -> {
-                vertx
-                    .undeploy(s)
-                    .onSuccess(v -> System.out.println("Produced block & undeployed."))
-                    .onFailure(err -> err.printStackTrace(System.err));
-                context.next();
-            })
+            .deployVerticle(new MinerVerticle(blockchain, utxos, minerWallet, blockData), new DeploymentOptions())
+            .onSuccess(s -> context.next())
             .onFailure(err ->
                 addResponseHeaders(HttpResponseStatus.BAD_REQUEST, context)
                     .end(error(err.getMessage()))

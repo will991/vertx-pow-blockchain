@@ -7,12 +7,14 @@ import io.chain.models.Transaction;
 import io.chain.models.UTxOSet;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import static io.chain.p2p.EventBusAddresses.SYNC_WALLET;
 import static io.chain.p2p.handlers.NewUnconfirmedTransactionHandler.UNCONFIRMED_TX_POOL;
 
 @RequiredArgsConstructor
@@ -41,7 +43,12 @@ public final class NewBlockHandler implements Handler<Message<JsonObject>> {
                 .forEach(tx ->
                     vertx.sharedData().getLocalMap(UNCONFIRMED_TX_POOL).remove(tx.hash())
                 );
-            message.reply("");
+
+            vertx.eventBus().send(
+                SYNC_WALLET.getAddress(),
+                "",
+                new DeliveryOptions().setLocalOnly(true)
+            );
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }

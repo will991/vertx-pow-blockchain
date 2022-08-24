@@ -3,15 +3,12 @@ package io.chain.verticles;
 import io.chain.models.*;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.chain.p2p.EventBusAddresses.NEW_BLOCK;
 import static io.chain.p2p.EventBusAddresses.NEW_BLOCKCHAIN;
 import static io.chain.p2p.handlers.NewUnconfirmedTransactionHandler.UNCONFIRMED_TX_POOL;
 
@@ -36,33 +33,16 @@ public final class MinerVerticle extends AbstractVerticle {
             vertx.sharedData().<String, Transaction>getLocalMap(UNCONFIRMED_TX_POOL).values()
         );
         unconfirmedTxs.add(Transaction.rewardTransaction(wallet));
+
         vertx.
             <Block>executeBlocking(future ->
                 future.complete(blockchain.addBlock(unconfirmedTxs, data))
             ).onSuccess(block -> {
-                final JsonArray jsonBlockchain = blockchain.toJson();
+                /* NOTE: Triggers blockchain update */
                 vertx
                     .eventBus()
-                    .request(
-                        NEW_BLOCK.getAddress(),
-                        jsonBlockchain.getJsonObject(jsonBlockchain.size() - 1),
-                        new DeliveryOptions().setLocalOnly(true),
-                        reply -> {
-                            if (reply.failed()) {
-                                reply.cause().printStackTrace(System.err);
-                                startPromise.fail(reply.cause());
-                                return;
-                            }
-                            try {
-                                utxoSet.sync(wallet);
-                            } catch (Wallet.MismatchingUTxOAddressException e) {
-                                e.printStackTrace(System.err);
-                            }
-                            vertx
-                                .eventBus()
-                                .publish(NEW_BLOCKCHAIN.getAddress(), blockchain.toJson());
-                            startPromise.complete();
-                        });
+                    .publish(NEW_BLOCKCHAIN.getAddress(), blockchain.toJson());
+                startPromise.complete();
             });
     }
 }
