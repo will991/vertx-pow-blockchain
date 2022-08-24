@@ -27,7 +27,7 @@ abstract class AbstractHttpServerVerticle extends AbstractConfiguredVerticle {
             .compose(this::createHttpServer)
             .onSuccess(httpServer -> {
                 this.server = httpServer;
-                final String msg = format("%s listening on: http://localhost:%d", getClass().getSimpleName(), httpServer.actualPort());
+                final String msg = format("Listening on: http://localhost:%d", httpServer.actualPort());
                 System.out.println(msg);
                 LOGGER.info(msg);
                 startPromise.complete();
