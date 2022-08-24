@@ -3,6 +3,7 @@ package io.chain.models;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.starkbank.ellipticcurve.Signature;
+import io.chain.models.serialization.ByteArrayHexDeserializer;
 import io.chain.models.serialization.ByteArrayHexSerializer;
 import io.chain.models.serialization.InputDeserializer;
 import io.chain.models.serialization.SignatureHexSerializer;
@@ -17,6 +18,7 @@ import java.util.Objects;
 @JsonDeserialize(using = InputDeserializer.class)
 public final class Input implements Comparable<Input> {
     @JsonSerialize(using = ByteArrayHexSerializer.class)
+    @JsonDeserialize(using = ByteArrayHexDeserializer.class)
     private final byte[] txHash;
     private final int index;
     @JsonSerialize(using = SignatureHexSerializer.class)
