@@ -6,7 +6,7 @@
 
 `GET /blockCount` Returns height of blockchain.
 
-`GET/block/:blockHash` Returns the respective block or error.
+`GET /block/:blockHash` Returns the respective block or error.
 
 `GET /transaction/:txHash` Returns the respective transaction or error.
 
@@ -59,7 +59,6 @@ There are a few available configurations which can be found in
     "host": "localhost",
     "port": 8080
   },
-  "isMiner": true,
   "initialUTxOs": []
 }
 ```
