@@ -17,7 +17,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static io.chain.p2p.handlers.NewUnconfirmedTransactionHandler.UNCONFIRMED_TX_POOL;
+import static io.chain.LocalMapConstants.UNCONFIRMED_TX_POOL;
 
 @ExtendWith(VertxExtension.class)
 public abstract class AbstractVerticleTest {
