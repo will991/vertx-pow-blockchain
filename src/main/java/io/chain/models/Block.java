@@ -1,7 +1,7 @@
 package io.chain.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
@@ -17,12 +17,13 @@ import java.util.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Block {
 
     public static final int MINING_REWARD = 100;
     private static final int DIFFICULTY = 4;
     private static String DIFFICULTY_PREFIX;
-    {
+    static {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < DIFFICULTY; i++) {
             sb.append("0");
@@ -35,7 +36,6 @@ public class Block {
      */
 
     long timestamp;
-    String hash;
     String previousBlockHash;
     byte[] data;
     int nonce;
@@ -45,12 +45,12 @@ public class Block {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Block block = (Block) o;
-        return timestamp == block.timestamp && nonce == block.nonce && Objects.equals(hash, block.hash) && Objects.equals(previousBlockHash, block.previousBlockHash) && Arrays.equals(data, block.data);
+        return timestamp == block.timestamp && nonce == block.nonce && Objects.equals(previousBlockHash, block.previousBlockHash) && Arrays.equals(data, block.data);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(timestamp, hash, previousBlockHash, nonce);
+        int result = Objects.hash(timestamp, previousBlockHash, nonce);
         result = 31 * result + Arrays.hashCode(data);
         return result;
     }
@@ -87,17 +87,23 @@ public class Block {
         }
     }
 
+    public String getHash() {
+        return hash(this);
+    }
+
     @JsonIgnore
     public String getUTF_8Data() {
+        if (getData() == null) return null;
+
         try {
             final JsonObject blockData = Buffer.buffer(getData()).toJsonObject();
             final Object data = blockData.getValue("data");
             if (data != null)
                 return new String(data.toString().getBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            /* ignore */
+
         }
-        return null;
+        return new String(getData(), StandardCharsets.UTF_8);
     }
 
     /*
@@ -105,11 +111,10 @@ public class Block {
      */
 
     public static Block genesisBlock() {
-        final long start = new GregorianCalendar(1991,11,3).getTimeInMillis();
+        final long start = new GregorianCalendar(1991, Calendar.NOVEMBER,3).getTimeInMillis();
         final byte[] data = "Will is building his own chain".getBytes();
         return builder()
                 .timestamp(start)
-                .hash(hash(start, "WillWasStillUnborn", data, 0))
                 .previousBlockHash("WillWasStillUnborn")
                 .data(data)
                 .nonce(0)
@@ -135,7 +140,6 @@ public class Block {
         return builder()
                 .timestamp(minedAt)
                 .previousBlockHash(lastBlock.getHash())
-                .hash(hash)
                 .data(data)
                 .nonce(nonce)
                 .build();
