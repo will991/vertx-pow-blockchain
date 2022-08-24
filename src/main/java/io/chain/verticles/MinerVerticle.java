@@ -22,7 +22,6 @@ public final class MinerVerticle extends AbstractVerticle {
     private final UTxOSet utxoSet;
     private final Wallet wallet;
     private final byte[] data;
-    private final Vertx vertx;
 
     @Override
     public void start(Promise<Void> startPromise) {

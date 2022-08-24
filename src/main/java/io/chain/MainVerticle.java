@@ -27,9 +27,11 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
+        System.out.println("Launched new instance: " + uuid);
+
         deploy(new RestApiVerticle(blockchain, minerWallet, utxos), new DeploymentOptions().setConfig(config()))
             .compose(r -> deploy(new BlockchainSyncVerticle(blockchain, utxos, uuid), new DeploymentOptions()))
-            .compose(r -> deploy(new TransactionPoolManagerVerticle(utxos, uuid), new DeploymentOptions().setConfig(config())))
+            .compose(r -> deploy(new TransactionPoolManagerVerticle(uuid, utxos, minerWallet), new DeploymentOptions().setConfig(config())))
             .onSuccess(startPromise::complete)
             .onFailure(startPromise::fail);
     }
@@ -48,5 +50,4 @@ public class MainVerticle extends AbstractVerticle {
             });
         return promise.future();
     }
-
 }
