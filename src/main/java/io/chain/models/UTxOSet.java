@@ -1,6 +1,7 @@
 package io.chain.models;
 
 import com.starkbank.ellipticcurve.PublicKey;
+import io.chain.models.exceptions.TransactionValidationException;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.util.*;
@@ -73,6 +74,13 @@ public final class UTxOSet {
                     add(utxo);
                 }
                 processed.add(tx);
+            } else {
+                System.out.println("Invalid Tx: " + tx.hash());
+                try {
+                    Transaction.validate(tx, this);
+                } catch (TransactionValidationException e) {
+                    e.printStackTrace(System.err);
+                }
             }
         }
         return unmodifiableList(new ArrayList<>(processed));

@@ -4,10 +4,12 @@ import com.starkbank.ellipticcurve.Ecdsa;
 import com.starkbank.ellipticcurve.PrivateKey;
 import com.starkbank.ellipticcurve.PublicKey;
 import com.starkbank.ellipticcurve.Signature;
+import com.starkbank.ellipticcurve.utils.ByteString;
 import io.chain.models.exceptions.InsufficientUTxOBalanceException;
 import io.vertx.core.buffer.Buffer;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -21,7 +23,13 @@ import static java.util.Collections.unmodifiableList;
 
 @ToString
 public final class Wallet {
-    public static final Wallet COINBASE = new Wallet();
+
+    @Setter(AccessLevel.PRIVATE)
+    public static Wallet COINBASE;
+    static {
+        final PrivateKey sk = PrivateKey.fromString(new ByteString(Hex.decode("7aa25a3549b117aeb11a3e9aace30f713493ebb85df577334452222252b5784411")));
+        COINBASE = new Wallet(sk);
+    }
 
     private final List<UTxO> utxos;
     @Getter(AccessLevel.PRIVATE)
@@ -29,22 +37,27 @@ public final class Wallet {
     @Getter
     private final PublicKey pk;
 
-    public Wallet () {
-        this.utxos = new ArrayList<>();
-        this.sk = new PrivateKey();
-        this.pk = sk.publicKey();
+    public Wallet() {
+        this(new PrivateKey());
     }
 
-    public Wallet(PrivateKey sk, PublicKey pk, UTxO... utxos) throws MismatchingUTxOAddressException {
-        this(sk, pk, new ArrayList<>(Arrays.asList(utxos)));
-    }
-
-    public Wallet (PrivateKey sk, PublicKey pk, List<UTxO> utxos) throws MismatchingUTxOAddressException {
+    public Wallet(PrivateKey sk) {
         this.sk = sk;
-        this.pk = pk;
+        this.pk = sk.publicKey();
+        this.utxos = new ArrayList<>();
+    }
 
+    public Wallet(PrivateKey sk, UTxO... utxos) throws MismatchingUTxOAddressException {
+        this(sk, new ArrayList<>(Arrays.asList(utxos)));
+    }
+
+    public Wallet(PrivateKey sk, List<UTxO> utxos) throws MismatchingUTxOAddressException {
+        this.sk = sk;
+        this.pk = sk.publicKey();
+
+        final String pkHex = Hex.toHexString(pk.toByteString().getBytes());
         final Optional<UTxO> utxo = utxos.stream()
-                .filter(u -> ! u.getTxOut().getAddress().equals(this.pk))
+                .filter(u -> ! Hex.toHexString(u.getTxOut().getAddress().toByteString().getBytes()).equals(pkHex))
                 .findFirst();
         if (utxo.isPresent()) {
             throw new MismatchingUTxOAddressException(this.pk, utxo.get());
@@ -89,8 +102,8 @@ public final class Wallet {
 
     public Transaction sign(Transaction tx) {
         for (int i = 0; i < tx.getInputs().size(); i++) {
-            final String signableData = Buffer.buffer(tx.getRawDataToSign(i)).toString();
-            final Signature signature = Ecdsa.sign(signableData, sk);
+            final String signedData = Buffer.buffer(tx.getRawDataToSign(i)).toString();
+            final Signature signature = Ecdsa.sign(signedData, sk);
             tx.getInputs().get(i).addSignature(signature);
         }
         return tx;

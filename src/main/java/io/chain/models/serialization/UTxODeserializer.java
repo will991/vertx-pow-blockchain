@@ -28,13 +28,18 @@ public class UTxODeserializer extends StdDeserializer<UTxO> {
     @Override
     public UTxO deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
         final JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-        final JsonNode iNode = node.get("input");
+        final JsonNode iNode = node.get("txIn");
         final byte[] txHash = Hex.decode(iNode.get("txHash").textValue());
         final int txIdx = (int) iNode.get("index").numberValue();
-        final Signature sig = Signature.fromBase64(new ByteString(iNode.get("signature").textValue().getBytes()));
-        final Input input = new Input(txHash, txIdx, sig);
+        final Input input;
+        if (iNode.hasNonNull("signature")) {
+            final Signature sig = Signature.fromBase64(new ByteString(iNode.get("signature").textValue().getBytes()));
+            input = new Input(txHash, txIdx, sig);
+        } else {
+            input = new Input(txHash, txIdx);
+        }
 
-        final JsonNode oNode = node.get("output");
+        final JsonNode oNode = node.get("txOut");
         final PublicKey address = PublicKey.fromString(new ByteString(Hex.decode(oNode.get("address").textValue())));
         final int amount = (int) oNode.get("amount").numberValue();
         final Output output = new Output(address, amount);

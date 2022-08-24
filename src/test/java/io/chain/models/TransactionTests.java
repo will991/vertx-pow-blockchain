@@ -32,7 +32,7 @@ public final class TransactionTests {
     void setupWallet() throws Wallet.MismatchingUTxOAddressException {
         final UTxO utxo = new UTxO(new Input("123".getBytes(), 0), new Output(pk, 50));
         utxoSet = new UTxOSet();
-        wallet = new Wallet(sk, pk, utxo);
+        wallet = new Wallet(sk, utxo);
     }
 
     @Test

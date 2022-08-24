@@ -11,6 +11,7 @@ import io.chain.models.Input;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class InputDeserializer extends StdDeserializer<Input> {
 
@@ -25,8 +26,7 @@ public class InputDeserializer extends StdDeserializer<Input> {
     @Override
     public Input deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
         final JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-        final byte[] txHash = Hex.decode(node.get("txHash").textValue());
-        System.out.println("TxHash: " + txHash);
+        final byte[] txHash = new String(Hex.decode(node.get("txHash").textValue()), StandardCharsets.UTF_8).getBytes();
         final int txIdx = (int) node.get("index").numberValue();
         final Signature sig = Signature.fromBase64(new ByteString(node.get("signature").textValue().getBytes()));
         return new Input(txHash, txIdx, sig);
