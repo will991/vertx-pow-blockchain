@@ -53,6 +53,11 @@ public final class RestApiRouter extends RouterImpl {
             .handler(new MineBlockHandler(blockchain, utxos, wallet, vertx))
             .handler(new GetBlocksHandler(blockchain))
             .setName("Mine a new block");
+
+        /* UTxO ENDPOINTS */
+        get("/utxos")
+            .handler(new GetUTxOSetHandler(utxos))
+            .setName("Get all available utxos");
     }
 
 }
