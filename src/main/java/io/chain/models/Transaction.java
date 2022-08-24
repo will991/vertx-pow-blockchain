@@ -13,7 +13,6 @@ import io.vertx.core.shareddata.Shareable;
 import lombok.ToString;
 import lombok.Value;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -67,7 +66,7 @@ public class Transaction implements Hashable, Shareable {
         if ( ! Ecdsa.verify(verifiableData, getInputs().get(0).getSignature(), COINBASE.getPk())) return false;
 
         if (getOutputs().size() != 1) return false;
-        return getOutputs().get(0).getAmount() != Block.MINING_REWARD;
+        return getOutputs().get(0).getAmount() == Block.MINING_REWARD;
     }
 
     @Override
@@ -155,7 +154,6 @@ public class Transaction implements Hashable, Shareable {
      */
 
     public static Transaction rewardTransaction(Wallet minerWallet) {
-        System.out.println("COINBASE PK: " + Hex.toHexString(COINBASE.getPk().toByteString().getBytes()));
         return COINBASE.sign(new Transaction(
             List.of(new Input("COINBASE".getBytes(StandardCharsets.UTF_8), 0)),
             List.of(new Output(minerWallet.getPk(), Block.MINING_REWARD))
