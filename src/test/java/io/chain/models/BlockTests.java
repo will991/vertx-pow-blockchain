@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import static io.chain.models.Block.*;
@@ -26,7 +27,7 @@ public final class BlockTests {
     @Test
     @DisplayName("test correct genesis block")
     void testGenesisBlock() {
-        final long bornAt = new GregorianCalendar(1991,11,3).getTimeInMillis();
+        final long bornAt = new GregorianCalendar(1991, Calendar.NOVEMBER,3).getTimeInMillis();
         final String data = "Will is building his own chain";
         assertEquals(bornAt, genesisBlock.getTimestamp());
         assertEquals("WillWasStillUnborn", genesisBlock.getPreviousBlockHash());
@@ -39,12 +40,11 @@ public final class BlockTests {
     void testCreateBlock() {
         final long now = 1000L;
         final Block block = Block.builder()
-                                .hash("1")
                                 .previousBlockHash("0")
                                 .timestamp(now)
                                 .build();
         assertEquals(
-            format("Block(timestamp=%d, hash=%d, previousBlockHash=%d, data=null, nonce=0)", now, 1, 0),
+            format("Block(timestamp=%d, previousBlockHash=%d, data=null, nonce=0)", now, 0),
             block.toString()
         );
     }
@@ -57,11 +57,12 @@ public final class BlockTests {
          * Cannot directly test <code>Block.mine</code> method due to hardcoded <i>block mining timestamp</i>.
          */
         final long now = System.currentTimeMillis();
-        final String hash = hash(now, genesisBlock.getHash(), "test data".getBytes(StandardCharsets.UTF_8), 0);
+        final String hash = hash(now, genesisBlock.getHash(), "123".getBytes(), 0);
         final Block newBlock = Block.builder()
-                                .hash(hash)
                                 .previousBlockHash(genesisBlock.getHash())
                                 .timestamp(now)
+                                .nonce(0)
+                                .data("123".getBytes())
                                 .build();
         assertEquals(genesisBlock.getHash(), newBlock.getPreviousBlockHash());
         assertEquals(hash, newBlock.getHash());

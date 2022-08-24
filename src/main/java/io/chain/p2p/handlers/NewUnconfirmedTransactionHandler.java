@@ -8,10 +8,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public final class NewUnconfirmedTransactionHandler implements Handler<Message<String>> {
+public final class NewUnconfirmedTransactionHandler implements Handler<Message<JsonObject>> {
     public static final String UNCONFIRMED_TX_POOL = "io.chain.unconfirmed.txs.pool";
 
     private final String uuid;
@@ -19,14 +20,14 @@ public final class NewUnconfirmedTransactionHandler implements Handler<Message<S
     private final Vertx vertx;
 
     @Override
-    public void handle(Message<String> msg) {
-        final Transaction tx = Json.decodeValue(msg.body(), Transaction.class);
+    public void handle(Message<JsonObject> msg) {
+        final Transaction tx = Json.decodeValue(msg.body().encode(), Transaction.class);
         try {
             Transaction.validate(tx, utxos);
             vertx
                 .sharedData()
-                .<String, Transaction>getLocalMap(UNCONFIRMED_TX_POOL)
-                .put(tx.hash(), tx);
+                .<String, JsonObject>getLocalMap(UNCONFIRMED_TX_POOL)
+                .put(tx.hash(), tx.toJson());
         } catch (TransactionValidationException e) {
             e.printStackTrace(System.err);
             msg.reply(e.toJson(), new DeliveryOptions().setLocalOnly(true));

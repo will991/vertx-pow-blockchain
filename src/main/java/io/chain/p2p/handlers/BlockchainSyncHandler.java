@@ -42,11 +42,7 @@ public final class BlockchainSyncHandler implements Handler<Message<JsonArray>> 
             }
 
             /* NOTE: Trigger UTxOSet update */
-            vertx.eventBus().send(
-                NEW_BLOCK.getAddress(),
-                msg.body().getJsonObject(msg.body().size() - 1),
-                new DeliveryOptions().setLocalOnly(true)
-            );
+            vertx.eventBus().send(NEW_BLOCK.getAddress(), "", new DeliveryOptions().setLocalOnly(true));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
